@@ -52,14 +52,25 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-      .then(({ data, error }) => {
-        if (!cancelled) setLoaded({ userId, profile: data ?? null, error: error ? error.message : null });
+    void (async () => {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+      if (cancelled) return;
+      if (!error && !data) {
+        // No profile for this sign-in. If the server no longer knows the account (deleted, or
+        // a local database reset), the saved sign-in is stale: clear it and show sign-in.
+        const { data: user, error: userError } = await supabase.auth.getUser();
+        if (cancelled) return;
+        if (userError || !user.user) {
+          await supabase.auth.signOut({ scope: 'local' });
+          return;
+        }
+      }
+      setLoaded({
+        userId,
+        profile: data ?? null,
+        error: error ? error.message : data ? null : 'Your account profile is missing. Please sign out and sign in again.',
       });
+    })();
     return () => {
       cancelled = true;
     };
