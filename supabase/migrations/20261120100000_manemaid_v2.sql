@@ -316,25 +316,8 @@ alter table public.scope_templates enable row level security;
 create policy "scope templates: agency all" on public.scope_templates
   for all to authenticated using ((select public.is_agency())) with check ((select public.is_agency()));
 
-insert into public.scope_templates (title, body, category_code, sort_order) values
-  ('Daily home cleaning',
-   'Sweeping and mopping all rooms, dusting furniture, cleaning kitchen counters and sink, washing utensils and taking out the trash.',
-   'home_care', 1),
-  ('Cooking – breakfast & lunch',
-   'Preparing breakfast and lunch for the household as per the family''s menu, chopping and prep, and cleaning the kitchen after cooking.',
-   'cooking', 2),
-  ('Nanny – day care',
-   'Feeding, bathing and dressing the child, play and nap routine, keeping the child''s room tidy and sharing daily updates with parents.',
-   'child_care', 3),
-  ('Elder care – daytime',
-   'Companionship, help with mobility and bathing, medication reminders, simple meals and light housekeeping of the room.',
-   'elder_care', 4),
-  ('Deep cleaning',
-   'Full home deep clean: bathrooms, kitchen degreasing, windows, fans and fixtures, cupboards and balconies.',
-   'housekeeping', 5),
-  ('Live-in help',
-   'Full-time live-in help: daily cleaning, cooking assistance, laundry and household support. Weekly off as agreed.',
-   'live_in', 6);
+-- Default templates are inserted by seed.sql: they reference service_categories,
+-- which only exist after seeding (or after the agency adds them in production).
 
 -- ---------------------------------------------------------------------------
 -- Storage: profile photos and staff photos

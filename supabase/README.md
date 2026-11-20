@@ -28,7 +28,7 @@ the row, validates the move, writes `booking_events` (audit trail) and notifies 
 
 | Who | Function | Does |
 |---|---|---|
-| customer | `submit_enquiry(...)` | Creates a booking; checks address ownership and PIN serviceability |
+| customer | `submit_enquiry(...)` | Creates a booking; checks address ownership and PIN serviceability. `p_language_prefs text[]` = preferred languages (empty = any) |
 | customer | `respond_quotation(id, accept, note)` | Accept → staff matching (sets agreed price); decline → back to review |
 | customer | `respond_staff_proposal(id, approve, note)` | Approve → confirmed (re-checks clashes under a lock); reject → matching |
 | both | `update_booking_status(id, to, reason)` | Review / withdraw / start / complete / cancel, as the transition table allows |

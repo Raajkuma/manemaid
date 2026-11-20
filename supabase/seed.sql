@@ -45,3 +45,24 @@ values
    '{mobility_support,medication_reminders,companionship}', '{Urdu,Hindi,Kannada}', 12, '560041',
    'Patient and caring; experienced with seniors who need daily support.',
    'verified', now() - interval '30 days', 'available', 4.7);
+
+-- Quotation scope templates (moved here from the v2 migration: they need the categories above).
+insert into public.scope_templates (title, body, category_code, sort_order) values
+  ('Daily home cleaning',
+   'Sweeping and mopping all rooms, dusting furniture, cleaning kitchen counters and sink, washing utensils and taking out the trash.',
+   'home_care', 1),
+  ('Cooking – breakfast & lunch',
+   'Preparing breakfast and lunch for the household as per the family''s menu, chopping and prep, and cleaning the kitchen after cooking.',
+   'cooking', 2),
+  ('Nanny – day care',
+   'Feeding, bathing and dressing the child, play and nap routine, keeping the child''s room tidy and sharing daily updates with parents.',
+   'child_care', 3),
+  ('Elder care – daytime',
+   'Companionship, help with mobility and bathing, medication reminders, simple meals and light housekeeping of the room.',
+   'elder_care', 4),
+  ('Deep cleaning',
+   'Full home deep clean: bathrooms, kitchen degreasing, windows, fans and fixtures, cupboards and balconies.',
+   'housekeeping', 5),
+  ('Live-in help',
+   'Full-time live-in help: daily cleaning, cooking assistance, laundry and household support. Weekly off as agreed.',
+   'live_in', 6);
