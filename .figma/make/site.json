@@ -1,0 +1,10 @@
+{
+  "description": "Creates complete application pages to help teams quickly plan, design, and organize cohesive digital experiences.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
