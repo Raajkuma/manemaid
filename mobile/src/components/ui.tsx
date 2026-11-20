@@ -201,6 +201,7 @@ export function Screen({
   footer,
   hero,
   edges = ['top'],
+  overlapHero = true,
 }: {
   children: ReactNode;
   refreshing?: boolean;
@@ -208,6 +209,12 @@ export function Screen({
   footer?: ReactNode;
   hero?: ReactNode;
   edges?: ('top' | 'bottom')[];
+  /**
+   * Pull the content up over the bottom of the hero so the first white card "floats" on it.
+   * Turn off when the content starts with chips, buttons or a field label: those collide
+   * with the gradient instead of floating on it.
+   */
+  overlapHero?: boolean;
 }) {
   return (
     <SafeAreaView style={styles.screen} edges={hero ? [] : edges}>
@@ -233,7 +240,7 @@ export function Screen({
           }
         >
           {hero}
-          <View style={[styles.content, hero ? { marginTop: -space.xl } : null]}>{children}</View>
+          <View style={[styles.content, hero && overlapHero ? { marginTop: -space.xl } : null]}>{children}</View>
         </ScrollView>
         {footer ? (
           <SafeAreaView edges={['bottom']} style={styles.footer}>
@@ -748,13 +755,14 @@ export function useTabBarOptions() {
     headerShown: false,
     tabBarActiveTintColor: colors.primary,
     tabBarInactiveTintColor: colors.muted,
-    tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 11 },
+    tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 11, lineHeight: 14 },
     tabBarStyle: {
       backgroundColor: colors.surface,
       borderTopWidth: 0,
-      height: 60 + insets.bottom,
-      paddingTop: 8,
-      paddingBottom: Math.max(insets.bottom, 8),
+      // 52px for icon + label: at 44px the label was squeezed and cut off.
+      height: 64 + insets.bottom,
+      paddingTop: 6,
+      paddingBottom: Math.max(insets.bottom, 6),
       ...shadow(3),
     },
   } as const;

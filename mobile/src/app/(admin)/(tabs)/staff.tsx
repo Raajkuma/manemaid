@@ -45,6 +45,7 @@ export default function StaffList() {
 
   return (
     <Screen
+      overlapHero={false}
       refreshing={q.refreshing}
       onRefresh={q.refresh}
       hero={

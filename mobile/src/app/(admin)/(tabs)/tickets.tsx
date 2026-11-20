@@ -49,6 +49,7 @@ export default function AgencyTickets() {
 
   return (
     <Screen
+      overlapHero={false}
       refreshing={q.refreshing}
       onRefresh={q.refresh}
       hero={

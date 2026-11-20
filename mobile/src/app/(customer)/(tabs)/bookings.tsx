@@ -27,6 +27,7 @@ export default function Bookings() {
 
   return (
     <Screen
+      overlapHero={false}
       refreshing={q.refreshing}
       onRefresh={q.refresh}
       hero={<Hero eyebrow="Your services" title="Bookings" subtitle={`${current.length} current · ${past.length} past`} />}

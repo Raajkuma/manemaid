@@ -41,6 +41,8 @@ export function InboxScreen() {
 
   return (
     <Screen
+      // "Mark all as read" would sit on the gradient; cards alone can float over it.
+      overlapHero={unread === 0}
       refreshing={q.refreshing}
       onRefresh={q.refresh}
       hero={

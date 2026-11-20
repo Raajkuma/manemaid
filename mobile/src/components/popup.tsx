@@ -33,6 +33,12 @@ type ConfirmOptions = {
   reason?: 'required' | 'optional';
   reasonLabel?: string;
   reasonPlaceholder?: string;
+  /** Text already in the box when the pop-up opens (e.g. the current value being edited). */
+  reasonInitial?: string;
+  /** One-line text field instead of a multi-line text area (for short values like a name). */
+  reasonSingleLine?: boolean;
+  /** Shown when 'required' and the box is empty. Defaults to asking for a reason. */
+  reasonRequiredMessage?: string;
   /** Runs while the pop-up shows a spinner. Throw to show the error inline and keep it open. */
   onConfirm?: (text: string) => Promise<unknown> | unknown;
   /** Shown as an animated success state after onConfirm succeeds. */
@@ -95,7 +101,7 @@ export function PopupProvider({ children }: { children: ReactNode }) {
 }
 
 function PopupCard({ state, close }: { state: NonNullable<State>; close: () => void }) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(state.kind === 'confirm' ? (state.o.reasonInitial ?? '') : '');
   const [busy, setBusy] = useState(false);
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [done, setDone] = useState<{ title: string; message?: string } | null>(null);
@@ -137,7 +143,7 @@ function PopupCard({ state, close }: { state: NonNullable<State>; close: () => v
     if (state.kind !== 'confirm' || busy) return;
     const o = state.o;
     if (o.reason === 'required' && !text.trim()) {
-      setInlineError('Please add a short reason.');
+      setInlineError(o.reasonRequiredMessage ?? 'Please add a short reason.');
       errorFeedback();
       return;
     }
@@ -190,7 +196,10 @@ function PopupCard({ state, close }: { state: NonNullable<State>; close: () => v
                 if (inlineError) setInlineError(null);
               }}
               placeholder={o.reasonPlaceholder}
-              multiline
+              multiline={!o.reasonSingleLine}
+              autoCapitalize={o.reasonSingleLine ? 'words' : undefined}
+              returnKeyType={o.reasonSingleLine ? 'done' : undefined}
+              onSubmitEditing={o.reasonSingleLine ? () => void onConfirm() : undefined}
               autoFocus
             />
           </View>

@@ -62,10 +62,13 @@ function ProfileHeader() {
       icon: 'person',
       reason: 'required',
       reasonLabel: 'Full name',
-      reasonPlaceholder: profile.full_name ?? 'e.g. Riya Malhotra',
+      reasonPlaceholder: 'e.g. Riya Malhotra',
+      reasonInitial: profile.full_name ?? '',
+      reasonSingleLine: true,
+      reasonRequiredMessage: 'Please enter your name.',
       confirmLabel: 'Save',
       onConfirm: async (name) => {
-        unwrap(await supabase.from('profiles').update({ full_name: name }).eq('id', profile.id).select().single());
+        unwrap(await supabase.from('profiles').update({ full_name: name.trim() }).eq('id', profile.id).select().single());
         await refreshProfile();
       },
       success: { title: 'Name saved' },
