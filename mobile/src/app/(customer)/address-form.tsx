@@ -110,7 +110,7 @@ export default function AddressForm() {
   const missing = Object.values(errors).filter(Boolean).length;
 
   return (
-    <Screen width="form"
+    <Screen
       edges={[]}
       footer={
         <>

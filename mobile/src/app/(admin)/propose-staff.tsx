@@ -46,7 +46,7 @@ export default function ProposeStaff() {
   }
 
   return (
-    <Screen width="form" edges={[]} refreshing={q.refreshing} onRefresh={q.refresh}>
+    <Screen edges={[]} refreshing={q.refreshing} onRefresh={q.refresh}>
       <Row style={{ gap: space.md, marginBottom: space.lg }}>
         <Icon3D name="people" float />
         <Muted style={{ flex: 1, fontSize: 14 }}>

@@ -167,11 +167,11 @@ export default function NewRequest() {
       });
   }
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error) return <Screen width="form" edges={[]}><ErrorState message={q.error} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error) return <Screen edges={[]}><ErrorState message={q.error} onRetry={q.reload} /></Screen>;
 
   return (
-    <Screen width="form"
+    <Screen
       edges={[]}
       footer={
         <>

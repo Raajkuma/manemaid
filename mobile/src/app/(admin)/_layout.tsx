@@ -1,18 +1,9 @@
 import { Stack } from 'expo-router/stack';
-import { View } from 'react-native';
 
-import { AdminSidebar } from '@/components/admin-sidebar';
-import { stackOptions, useIsWide } from '@/components/ui';
+import { stackOptions } from '@/components/ui';
 
 export default function AdminLayout() {
-  // Desktop browser: a sidebar that stays on every agency page (the bottom tabs hide on wide
-  // screens). The navigator itself is always rendered in the same place so resizing the
-  // window across the breakpoint doesn't reset navigation.
-  const wide = useIsWide();
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
-      {wide ? <AdminSidebar /> : null}
-      <View style={{ flex: 1 }}>
     <Stack screenOptions={stackOptions}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="manage/[id]" options={{ title: 'Booking' }} />
@@ -24,7 +15,5 @@ export default function AdminLayout() {
       <Stack.Screen name="agency-settings" options={{ title: 'Agency settings' }} />
       <Stack.Screen name="ticket/[id]" options={{ title: 'Support request' }} />
     </Stack>
-      </View>
-    </View>
   );
 }

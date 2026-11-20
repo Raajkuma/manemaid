@@ -113,13 +113,13 @@ export default function SendQuote() {
       .then((ok) => ok && goBack(`/manage/${id}`));
   }
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
 
   const b = q.data.booking as unknown as { reference: string; category_code: string; service_categories: { name: string } | null };
 
   return (
-    <Screen width="form" edges={[]} footer={<Button label="Review & send" icon="paper-plane" onPress={send} />}>
+    <Screen edges={[]} footer={<Button label="Review & send" icon="paper-plane" onPress={send} />}>
       <Row style={{ gap: space.md, marginBottom: space.lg }}>
         <Icon3D name={CATEGORY_ICON[b.category_code] ?? 'briefcase'} float />
         <View style={{ flex: 1 }}>

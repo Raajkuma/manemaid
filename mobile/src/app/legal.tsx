@@ -15,7 +15,7 @@ export default function Legal() {
   const sections = tab === 'terms' ? TERMS : PRIVACY;
 
   return (
-    <Screen width="form" edges={[]}>
+    <Screen edges={[]}>
       <Row style={{ gap: space.md, marginBottom: space.lg }}>
         <Icon3D name={tab === 'terms' ? 'document-text' : 'shield-checkmark'} tone={tab === 'terms' ? 'primary' : 'green'} size={56} float />
         <View style={{ flex: 1 }}>

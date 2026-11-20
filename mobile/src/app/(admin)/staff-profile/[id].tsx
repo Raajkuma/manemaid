@@ -70,8 +70,8 @@ export default function StaffProfileScreen() {
     { key: `staff:${id}` },
   );
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
 
   const { staff: s, names, assignments, zones } = q.data;
   const st = STAFF_STATUS[s.status];
@@ -82,7 +82,6 @@ export default function StaffProfileScreen() {
 
   return (
     <Screen
-      width="form"
       edges={[]}
       refreshing={q.refreshing}
       onRefresh={q.refresh}

@@ -73,11 +73,11 @@ export default function NewSupportRequest() {
       });
   }
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Something went wrong'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Something went wrong'} onRetry={q.reload} /></Screen>;
 
   return (
-    <Screen width="form" edges={[]} footer={<Button label="Review & send" icon="paper-plane" onPress={submit} />}>
+    <Screen edges={[]} footer={<Button label="Review & send" icon="paper-plane" onPress={submit} />}>
       <FieldLabel label="What is this about?" required />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm, marginBottom: space.md }}>
         {TICKET_CATEGORIES.map((c, i) => {

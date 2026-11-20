@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Avatar, Badge, Button, Card, Chip, ChipGroup, EmptyState, ErrorState, Field, Grid, Hero, Icon3D, Loading, Muted, Pressable3D, Row, Screen, Strong } from '@/components/ui';
+import { Avatar, Badge, Button, Card, Chip, ChipGroup, EmptyState, ErrorState, Field, Hero, Icon3D, Loading, Muted, Pressable3D, Row, Screen, Strong } from '@/components/ui';
 import { STAFF_STATUS } from '@/lib/format';
 import { useLiveQuery } from '@/lib/hooks';
 import { photoUrl } from '@/lib/storage';
@@ -74,8 +74,7 @@ export default function StaffList() {
       ) : !list.length ? (
         <EmptyState icon="people" title={term || filter !== 'all' ? 'No matches' : 'No staff yet'} body="Add your first staff member to start matching." />
       ) : (
-        <Grid>
-        {list.map((s, i) => {
+        list.map((s, i) => {
           const st = STAFF_STATUS[s.status];
           const verified = s.verification_status === 'verified';
           return (
@@ -106,8 +105,7 @@ export default function StaffList() {
               </Row>
             </Card>
           );
-        })}
-        </Grid>
+        })
       )}
     </Screen>
   );

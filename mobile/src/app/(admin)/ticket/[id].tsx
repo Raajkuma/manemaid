@@ -52,8 +52,8 @@ export default function AgencyTicket() {
     { key: `agency-ticket:${id}`, tables: ['support_tickets', 'ticket_messages'] },
   );
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
 
   const { ticket: t, messages } = q.data;
   const c = categoryMeta(t.category);
@@ -85,7 +85,7 @@ export default function AgencyTicket() {
   }
 
   return (
-    <Screen width="form" edges={[]} refreshing={q.refreshing} onRefresh={q.refresh} footer={<TicketComposer ticketId={t.id} onSent={q.reload} placeholder="Reply to the customer…" />}>
+    <Screen edges={[]} refreshing={q.refreshing} onRefresh={q.refresh} footer={<TicketComposer ticketId={t.id} onSent={q.reload} placeholder="Reply to the customer…" />}>
       <Card index={0} tone={t.priority === 'urgent' && t.status !== 'closed' ? 'danger' : undefined}>
         <Row style={{ gap: space.md, alignItems: 'flex-start' }}>
           <Icon3D name={c.icon} tone={c.tone} size={50} />

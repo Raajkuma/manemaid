@@ -21,8 +21,8 @@ function toE164(s: string): string | null {
 
 export default function AgencySettings() {
   const q = useLiveQuery(async () => unwrap(await supabase.from('agency_settings').select('*').single()), { key: 'agency-settings' });
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
   return <SettingsForm initial={q.data} />;
 }
 
@@ -73,7 +73,7 @@ function SettingsForm({ initial }: { initial: Tables<'agency_settings'> }) {
   }
 
   return (
-    <Screen width="form" edges={[]} footer={<Button label="Save settings" icon="checkmark" onPress={save} loading={saving} />}>
+    <Screen edges={[]} footer={<Button label="Save settings" icon="checkmark" onPress={save} loading={saving} />}>
       <Card index={0}>
         <Row style={{ gap: space.md, marginBottom: space.md }}>
           <Icon3D name="business" />

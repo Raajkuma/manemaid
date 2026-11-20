@@ -89,8 +89,8 @@ export default function StaffForm() {
     { key: `staff-form:${id ?? 'new'}` },
   );
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
   return <StaffFormBody key={id ?? 'new'} id={id} data={q.data} />;
 }
 
@@ -205,7 +205,6 @@ function StaffFormBody({ id, data }: { id?: string; data: FormData }) {
 
   return (
     <Screen
-      width="form"
       edges={[]}
       footer={
         <>

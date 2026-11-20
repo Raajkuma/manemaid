@@ -39,8 +39,8 @@ export default function CustomerBooking() {
   const popup = usePopup();
   const q = useLiveQuery(() => fetchBookingBundle(id), { key: `booking:${id}`, tables: ['bookings'] });
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
 
   const { booking, quote, staff, events, support } = q.data;
   const proposed = staff.find((s) => s.assignment_status === 'proposed');
@@ -50,7 +50,7 @@ export default function CustomerBooking() {
   const total = quote ? Number(quote.monthly_price) + Number(quote.agency_fee) + Number(quote.tax) : 0;
 
   return (
-    <Screen width="form" edges={[]} refreshing={q.refreshing} onRefresh={q.refresh}>
+    <Screen edges={[]} refreshing={q.refreshing} onRefresh={q.refresh}>
       {booking.status === 'quotation_sent' && quote?.status === 'sent' ? (
         <Card tone="orange" index={0}>
           <Row style={{ gap: space.md, marginBottom: space.md }}>

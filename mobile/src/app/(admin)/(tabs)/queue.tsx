@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { BookingListItem, type BookingWithRefs } from '@/components/booking';
-import { Chip, ChipGroup, EmptyState, ErrorState, Grid, Hero, Icon3D, type IconName, Loading, Pressable3D, Screen } from '@/components/ui';
+import { Chip, ChipGroup, EmptyState, ErrorState, Hero, Icon3D, type IconName, Loading, Pressable3D, Screen } from '@/components/ui';
 import type { BookingStatus } from '@/lib/format';
 import { useLiveQuery } from '@/lib/hooks';
 import { supabase, unwrap } from '@/lib/supabase';
@@ -82,11 +82,9 @@ export default function Queue() {
       ) : list.length === 0 ? (
         <EmptyState icon="checkmark-done" tone="green" title="All clear" body="New enquiries appear here instantly." />
       ) : (
-        <Grid>
-          {list.map((b, i) => (
-            <BookingListItem key={b.id} index={i} booking={b} audience="agency" onPress={() => router.push(`/manage/${b.id}`)} />
-          ))}
-        </Grid>
+        list.map((b, i) => (
+          <BookingListItem key={b.id} index={i} booking={b} audience="agency" onPress={() => router.push(`/manage/${b.id}`)} />
+        ))
       )}
     </Screen>
   );

@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 
 import { BookingSummary, PaymentBadge, QuoteCard, StaffProfile, Timeline, fetchBookingBundle } from '@/components/booking';
 import { usePopup } from '@/components/popup';
-import { Button, Card, Columns, ErrorState, Heading, Icon3D, KeyValue, Loading, Muted, Row, Screen, SectionTitle, type IconName } from '@/components/ui';
+import { Button, Card, ErrorState, Heading, Icon3D, KeyValue, Loading, Muted, Row, Screen, SectionTitle, type IconName } from '@/components/ui';
 import { TERMINAL, formatDate, formatINR, type BookingStatus } from '@/lib/format';
 import { useLiveQuery } from '@/lib/hooks';
 import { supabase, unwrap } from '@/lib/supabase';
@@ -105,38 +105,7 @@ export default function ManageBooking() {
   return (
     <Screen edges={[]} refreshing={q.refreshing} onRefresh={q.refresh}>
       <BookingSummary booking={booking} audience="agency" />
-      <Columns
-        main={
-          <>
-      {quote ? (
-        <>
-          <SectionTitle>Latest quotation · {quote.status}</SectionTitle>
-          <Card>
-            <QuoteCard quote={quote} />
-            {quote.customer_note ? (
-              <View style={{ marginTop: space.md, backgroundColor: colors.orangeSoft, borderRadius: 12, padding: space.md }}>
-                <Muted style={{ color: colors.orange }}>Customer: {quote.customer_note}</Muted>
-              </View>
-            ) : null}
-          </Card>
-        </>
-      ) : null}
 
-      {current ? (
-        <>
-          <SectionTitle>{current.assignment_status === 'proposed' ? 'Proposed staff' : 'Assigned staff'}</SectionTitle>
-          <Card onPress={() => router.push(`/staff-profile/${current.staff_id}`)}>
-            <StaffProfile staff={current} />
-          </Card>
-        </>
-      ) : null}
-
-      <SectionTitle>Timeline</SectionTitle>
-      <Timeline events={events} audience="agency" />
-          </>
-        }
-        side={
-          <>
       {showPayment ? (
         <Card tone={booking.payment_status === 'pending_verification' ? 'orange' : booking.payment_status === 'paid' ? 'green' : undefined} index={0}>
           <Row style={{ gap: space.md, marginBottom: space.md }}>
@@ -229,9 +198,32 @@ export default function ManageBooking() {
           ))}
         </View>
       ) : null}
-          </>
-        }
-      />
+
+      {quote ? (
+        <>
+          <SectionTitle>Latest quotation · {quote.status}</SectionTitle>
+          <Card>
+            <QuoteCard quote={quote} />
+            {quote.customer_note ? (
+              <View style={{ marginTop: space.md, backgroundColor: colors.orangeSoft, borderRadius: 12, padding: space.md }}>
+                <Muted style={{ color: colors.orange }}>Customer: {quote.customer_note}</Muted>
+              </View>
+            ) : null}
+          </Card>
+        </>
+      ) : null}
+
+      {current ? (
+        <>
+          <SectionTitle>{current.assignment_status === 'proposed' ? 'Proposed staff' : 'Assigned staff'}</SectionTitle>
+          <Card onPress={() => router.push(`/staff-profile/${current.staff_id}`)}>
+            <StaffProfile staff={current} />
+          </Card>
+        </>
+      ) : null}
+
+      <SectionTitle>Timeline</SectionTitle>
+      <Timeline events={events} audience="agency" />
     </Screen>
   );
 }

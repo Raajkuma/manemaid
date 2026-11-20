@@ -123,10 +123,6 @@ npm run test:demo    # same flows against the offline demo backend
 npx expo export --platform android --platform ios --platform web   # bundles all platforms
 ```
 
-**Web / desktop**: from 1024 px wide the app switches to a desktop layout: left sidebar instead of the
-bottom tabs, lists in 2–3 columns, booking management in two columns, forms and dialogs at reading
-width. Phones are unchanged. The agency can work from a browser at the same URL.
-
 ## Shipping to the stores
 
 Uses only Expo Go–compatible modules, so it runs in Expo Go today. For store builds use

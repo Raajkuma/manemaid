@@ -17,7 +17,6 @@ import {
   Text,
   TextInput,
   View,
-  useWindowDimensions,
   type StyleProp,
   type TextInputProps,
   type TextStyle,
@@ -195,60 +194,6 @@ export function Icon3D({
 // Layout
 // ---------------------------------------------------------------------------
 
-/** Width from which we lay screens out for a desktop browser / tablet (sidebar, grids, columns). */
-export const WIDE_BREAKPOINT = 1024;
-/** Max content widths on wide screens: lists and dashboards vs. forms and conversations. */
-export const CONTENT_WIDTH = { page: 1200, form: 760 } as const;
-
-export function useIsWide() {
-  return useWindowDimensions().width >= WIDE_BREAKPOINT;
-}
-
-/** Centers content and caps its width on wide screens; no effect on phones. */
-function Contained({ width, style, children }: { width: number; style?: StyleProp<ViewStyle>; children: ReactNode }) {
-  const wide = useIsWide();
-  return <View style={[wide ? { width: '100%', maxWidth: width, alignSelf: 'center' } : null, style]}>{children}</View>;
-}
-
-/**
- * Lays children out in columns on wide screens (2, or 3 on very wide ones) and as a
- * single list on phones. Each child is one cell.
- */
-export function Grid({ children, columns }: { children: ReactNode; columns?: number }) {
-  const { width } = useWindowDimensions();
-  const cols = width < WIDE_BREAKPOINT ? 1 : (columns ?? (width >= 1500 ? 3 : 2));
-  const items = Array.isArray(children) ? children.flat().filter((c) => c != null && c !== false) : [children];
-  if (cols === 1) return <>{items}</>;
-  return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -space.sm / 2 }}>
-      {items.map((child, i) => (
-        <View key={(child as { key?: string | null })?.key ?? i} style={{ width: `${100 / cols}%`, paddingHorizontal: space.sm / 2 }}>
-          {child}
-        </View>
-      ))}
-    </View>
-  );
-}
-
-/** Main content plus a side panel (actions, summary) side by side on wide screens, stacked on phones. */
-export function Columns({ main, side }: { main: ReactNode; side: ReactNode }) {
-  const wide = useIsWide();
-  if (!wide) {
-    return (
-      <>
-        {side}
-        {main}
-      </>
-    );
-  }
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.xl }}>
-      <View style={{ flex: 3, minWidth: 0 }}>{main}</View>
-      <View style={{ flex: 2, minWidth: 0 }}>{side}</View>
-    </View>
-  );
-}
-
 export function Screen({
   children,
   refreshing,
@@ -256,7 +201,6 @@ export function Screen({
   footer,
   hero,
   edges = ['top'],
-  width = 'page',
 }: {
   children: ReactNode;
   refreshing?: boolean;
@@ -264,10 +208,7 @@ export function Screen({
   footer?: ReactNode;
   hero?: ReactNode;
   edges?: ('top' | 'bottom')[];
-  /** Max content width on wide screens: 'page' for lists/dashboards, 'form' for forms and threads. */
-  width?: keyof typeof CONTENT_WIDTH;
 }) {
-  const maxWidth = CONTENT_WIDTH[width];
   return (
     <SafeAreaView style={styles.screen} edges={hero ? [] : edges}>
       <KeyboardAvoidingView
@@ -292,15 +233,11 @@ export function Screen({
           }
         >
           {hero}
-          <Contained width={maxWidth} style={[styles.content, hero ? { marginTop: -space.xl } : null]}>
-            {children}
-          </Contained>
+          <View style={[styles.content, hero ? { marginTop: -space.xl } : null]}>{children}</View>
         </ScrollView>
         {footer ? (
           <SafeAreaView edges={['bottom']} style={styles.footer}>
-            <Contained width={maxWidth} style={{ gap: space.sm }}>
-              {footer}
-            </Contained>
+            {footer}
           </SafeAreaView>
         ) : null}
       </KeyboardAvoidingView>
@@ -340,19 +277,17 @@ export function Hero({
     >
       <Animated.View style={[styles.orb, { top: -60, right: -40, width: 200, height: 200 }, orb]} />
       <View style={[styles.orb, { bottom: -50, left: -30, width: 140, height: 140, opacity: 0.6 }]} />
-      <Contained width={CONTENT_WIDTH.page}>
-        <Animated.View entering={FadeInDown.springify().damping(18)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <View style={{ flex: 1 }}>
-            {eyebrow ? <Text style={styles.heroEyebrow}>{eyebrow}</Text> : null}
-            <Text style={styles.heroTitle} accessibilityRole="header">
-              {title}
-            </Text>
-            {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}
-          </View>
-          {right}
-        </Animated.View>
-        {children ? <View style={{ marginTop: space.lg }}>{children}</View> : null}
-      </Contained>
+      <Animated.View entering={FadeInDown.springify().damping(18)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+        <View style={{ flex: 1 }}>
+          {eyebrow ? <Text style={styles.heroEyebrow}>{eyebrow}</Text> : null}
+          <Text style={styles.heroTitle} accessibilityRole="header">
+            {title}
+          </Text>
+          {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}
+        </View>
+        {right}
+      </Animated.View>
+      {children ? <View style={{ marginTop: space.lg }}>{children}</View> : null}
     </LinearGradient>
   );
 }
@@ -668,18 +603,13 @@ export function Sheet({
   onClose: () => void;
   children: ReactNode;
 }) {
-  // Phones: a sheet sliding up from the bottom. Desktop browser: a centered dialog.
-  const wide = useIsWide();
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <Animated.View entering={FadeIn.duration(180)} style={[styles.backdrop, wide ? { justifyContent: 'center', padding: space.xl } : null]}>
+      <Animated.View entering={FadeIn.duration(180)} style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-        <Animated.View
-          entering={wide ? FadeInDown.springify().damping(18) : SlideInDown.springify().damping(18)}
-          style={[styles.sheet, wide ? { width: '100%', maxWidth: 640, maxHeight: '85%', alignSelf: 'center', borderRadius: radius.xl, paddingTop: space.lg } : null]}
-        >
+        <Animated.View entering={SlideInDown.springify().damping(18)} style={styles.sheet}>
           <SafeAreaView edges={['bottom']}>
-            {wide ? null : <View style={styles.grabber} />}
+            <View style={styles.grabber} />
             <Row style={{ justifyContent: 'space-between', marginBottom: space.md }}>
               <Heading style={{ fontSize: 18 }}>{title}</Heading>
               <Pressable onPress={onClose} accessibilityLabel="Close" hitSlop={12}>
@@ -814,28 +744,6 @@ export function tabIcon(name: IconName) {
 /** Tab bar styling that respects the device's bottom safe area (home bar / 3-button nav). */
 export function useTabBarOptions() {
   const insets = useSafeAreaInsets();
-  const wide = useIsWide();
-  if (wide) {
-    // Desktop browser / tablet: a left sidebar with labels next to the icons.
-    return {
-      headerShown: false,
-      tabBarPosition: 'left',
-      tabBarVariant: 'material',
-      tabBarLabelPosition: 'beside-icon',
-      tabBarActiveTintColor: colors.primary,
-      tabBarInactiveTintColor: colors.muted,
-      tabBarActiveBackgroundColor: colors.primarySoft,
-      tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 14 },
-      tabBarItemStyle: { borderRadius: radius.md, marginHorizontal: space.sm, marginVertical: 2, paddingHorizontal: space.sm },
-      tabBarStyle: {
-        backgroundColor: colors.surface,
-        width: 232,
-        paddingTop: space.xl,
-        borderRightWidth: 1,
-        borderRightColor: colors.line,
-      },
-    } as const;
-  }
   return {
     headerShown: false,
     tabBarActiveTintColor: colors.primary,

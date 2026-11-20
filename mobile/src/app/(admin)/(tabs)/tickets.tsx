@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { PRIORITY, TicketListItem, type Ticket, type TicketStatus } from '@/components/support';
-import { Chip, ChipGroup, EmptyState, ErrorState, Grid, Hero, Icon3D, Loading, Pressable3D, Screen } from '@/components/ui';
+import { Chip, ChipGroup, EmptyState, ErrorState, Hero, Icon3D, Loading, Pressable3D, Screen } from '@/components/ui';
 import { timeAgo } from '@/lib/format';
 import { useLiveQuery } from '@/lib/hooks';
 import { supabase, unwrap } from '@/lib/supabase';
@@ -91,8 +91,7 @@ export default function AgencyTickets() {
       ) : list.length === 0 ? (
         <EmptyState icon="happy" tone="green" title="No requests here" body="New customer requests appear instantly." />
       ) : (
-        <Grid>
-          {list.map((t, i) => (
+        list.map((t, i) => (
           <TicketListItem
             key={t.id}
             ticket={t}
@@ -100,8 +99,7 @@ export default function AgencyTickets() {
             subtitle={`${t.profiles?.full_name || 'Customer'}${t.is_priority_customer ? ' ⭐' : ''} · ${timeAgo(t.last_message_at)}`}
             onPress={() => router.push(`/ticket/${t.id}`)}
           />
-          ))}
-        </Grid>
+        ))
       )}
     </Screen>
   );

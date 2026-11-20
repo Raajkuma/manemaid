@@ -23,8 +23,8 @@ export default function CustomerTicket() {
     { key: `ticket:${id}`, tables: ['support_tickets', 'ticket_messages'] },
   );
 
-  if (q.loading) return <Screen width="form" edges={[]}><Loading /></Screen>;
-  if (q.error || !q.data) return <Screen width="form" edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
+  if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
+  if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
 
   const { ticket: t, messages } = q.data;
   const c = categoryMeta(t.category);
@@ -51,7 +51,7 @@ export default function CustomerTicket() {
   }
 
   return (
-    <Screen width="form"
+    <Screen
       edges={[]}
       refreshing={q.refreshing}
       onRefresh={q.refresh}

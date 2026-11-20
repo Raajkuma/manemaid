@@ -81,7 +81,6 @@ export default function Templates() {
 
   return (
     <Screen
-      width="form"
       edges={[]}
       refreshing={q.refreshing}
       onRefresh={q.refresh}

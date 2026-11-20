@@ -274,10 +274,6 @@ const s = StyleSheet.create({
     borderRadius: radius.xl,
     padding: space.xl,
     alignItems: 'center',
-    // Phones: full width. Desktop browser: a dialog, not a page-wide banner.
-    width: '100%',
-    maxWidth: 460,
-    alignSelf: 'center',
   },
   iconWrap: { alignItems: 'center', marginBottom: space.md, marginTop: -space.sm },
   ring: { position: 'absolute', width: 90, height: 90, borderRadius: 45, backgroundColor: colors.green },
