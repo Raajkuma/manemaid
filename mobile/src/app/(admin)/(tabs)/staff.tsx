@@ -3,9 +3,10 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Avatar, Badge, Button, Card, Chip, ChipGroup, EmptyState, ErrorState, Field, Hero, Icon3D, Loading, Muted, Pressable3D, Row, Screen, Strong } from '@/components/ui';
+import { Avatar, Badge, Button, Card, Chip, ChipGroup, EmptyState, ErrorState, Field, Hero, HeroAction, Loading, Muted, Row, Screen, Strong } from '@/components/ui';
 import { STAFF_STATUS } from '@/lib/format';
-import { useLiveQuery } from '@/lib/hooks';
+import { useLiveQuery, useUnreadCount } from '@/lib/hooks';
+import { useSession } from '@/lib/session';
 import { photoUrl } from '@/lib/storage';
 import { supabase, unwrap } from '@/lib/supabase';
 import { colors, space } from '@/lib/theme';
@@ -20,6 +21,8 @@ const FILTERS = [
 export default function StaffList() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('all');
   const [search, setSearch] = useState('');
+  const { session } = useSession();
+  const unread = useUnreadCount(session?.user.id);
   const q = useLiveQuery(
     async () => {
       const [staff, categories] = await Promise.all([
@@ -54,9 +57,10 @@ export default function StaffList() {
           title="Staff"
           subtitle={q.data ? `${q.data.staff.length} people · ${q.data.staff.filter((s) => s.status === 'available').length} available` : undefined}
           right={
-            <Pressable3D onPress={() => router.push('/staff-form')} accessibilityLabel="Add staff member" tilt={14}>
-              <Icon3D name="person-add" size={54} gradient={['#FFFFFF', '#E4DEFF']} float />
-            </Pressable3D>
+            <Row style={{ gap: space.sm }}>
+              <HeroAction icon="notifications" count={unread} onPress={() => router.push('/alerts')} accessibilityLabel="Inbox" />
+              <HeroAction icon="person-add" onPress={() => router.push('/staff-form')} accessibilityLabel="Add staff member" />
+            </Row>
           }
         />
       }

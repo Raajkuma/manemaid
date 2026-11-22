@@ -8,7 +8,7 @@ import { supabase, unwrap } from '@/lib/supabase';
 import { colors, space, type Tone } from '@/lib/theme';
 
 import { usePopup } from './popup';
-import { Body, Button, Card, EmptyState, ErrorState, Hero, Icon3D, Loading, Muted, Row, Screen, Strong, type IconName } from './ui';
+import { Body, Button, Card, EmptyState, ErrorState, Hero, HeroAction, Icon3D, Loading, Muted, Row, Screen, Strong, type IconName } from './ui';
 
 function iconFor(title: string): { icon: IconName; tone: Tone } {
   const t = title.toLowerCase();
@@ -50,7 +50,7 @@ export function InboxScreen() {
           eyebrow="Updates"
           title="Inbox"
           subtitle={unread ? `${unread} unread` : 'You are all caught up'}
-          right={<Icon3D name="notifications" size={52} gradient={['#FFFFFF', '#E4DEFF']} float />}
+          right={<HeroAction icon="notifications" size={52} count={unread} accessibilityLabel="Inbox" float />}
         />
       }
     >
