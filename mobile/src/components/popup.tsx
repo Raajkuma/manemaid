@@ -39,6 +39,10 @@ type ConfirmOptions = {
   reasonSingleLine?: boolean;
   /** Shown when 'required' and the box is empty. Defaults to asking for a reason. */
   reasonRequiredMessage?: string;
+  /** Keyboard for the text box (e.g. email). */
+  reasonKeyboard?: 'default' | 'email-address';
+  /** Extra check on the entered text: return an error message to block confirming. */
+  reasonValidate?: (text: string) => string | null;
   /** Runs while the pop-up shows a spinner. Throw to show the error inline and keep it open. */
   onConfirm?: (text: string) => Promise<unknown> | unknown;
   /** Shown as an animated success state after onConfirm succeeds. */
@@ -147,6 +151,12 @@ function PopupCard({ state, close }: { state: NonNullable<State>; close: () => v
       errorFeedback();
       return;
     }
+    const invalid = text.trim() ? o.reasonValidate?.(text.trim()) : null;
+    if (invalid) {
+      setInlineError(invalid);
+      errorFeedback();
+      return;
+    }
     setBusy(true);
     setInlineError(null);
     try {
@@ -197,7 +207,9 @@ function PopupCard({ state, close }: { state: NonNullable<State>; close: () => v
               }}
               placeholder={o.reasonPlaceholder}
               multiline={!o.reasonSingleLine}
-              autoCapitalize={o.reasonSingleLine ? 'words' : undefined}
+              autoCapitalize={o.reasonKeyboard === 'email-address' ? 'none' : o.reasonSingleLine ? 'words' : undefined}
+              keyboardType={o.reasonKeyboard}
+              autoCorrect={o.reasonKeyboard === 'email-address' ? false : undefined}
               returnKeyType={o.reasonSingleLine ? 'done' : undefined}
               onSubmitEditing={o.reasonSingleLine ? () => void onConfirm() : undefined}
               autoFocus

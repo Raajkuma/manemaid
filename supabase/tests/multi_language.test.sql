@@ -25,7 +25,7 @@ select is(
   (select count(*)::int from pg_proc where proname = 'submit_enquiry' and pronamespace = 'public'::regnamespace),
   1, 'exactly one submit_enquiry (no ambiguous overload)');
 select function_privs_are('public', 'submit_enquiry',
-  array['uuid','text','engagement_type','date','smallint[]','time without time zone','time without time zone','numeric','integer','integer','text[]','text','boolean'],
+  array['uuid','text','engagement_type','date','smallint[]','time without time zone','time without time zone','numeric','integer','integer','text[]','text','boolean','uuid'],
   'anon', array[]::text[], 'anon cannot call submit_enquiry');
 select is(public._clean_languages(array[' Hindi', '', 'Any', 'Kannada', 'Hindi', null]), array['Hindi', 'Kannada'],
   'languages are trimmed, de-duplicated, and blanks / "Any" dropped');

@@ -3,6 +3,8 @@ import { Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { BookingListItem, type BookingWithRefs } from '@/components/booking';
+import { GreetingPopup } from '@/components/greeting';
+import { OffersCarousel, type Offer } from '@/components/offers';
 import {
   Avatar,
   Button,
@@ -19,6 +21,7 @@ import {
   Strong,
   enter,
 } from '@/components/ui';
+import { useAppConfig } from '@/lib/config';
 import { CATEGORY_ICON, TERMINAL } from '@/lib/format';
 import { useLiveQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
@@ -28,12 +31,19 @@ import { colors, fonts, radius, shadow, space, type Tone } from '@/lib/theme';
 
 const NEEDS_YOU = ['quotation_sent', 'staff_proposed'];
 const TILE_TONES: Tone[] = ['primary', 'orange', 'green', 'blue', 'danger', 'primary'];
+const WHY_STYLE: { icon: 'shield-checkmark' | 'thumbs-up' | 'headset' | 'sparkles'; tone: Tone }[] = [
+  { icon: 'shield-checkmark', tone: 'green' },
+  { icon: 'thumbs-up', tone: 'orange' },
+  { icon: 'headset', tone: 'blue' },
+  { icon: 'sparkles', tone: 'primary' },
+];
 
 export default function Home() {
   const { profile } = useSession();
+  const config = useAppConfig();
   const q = useLiveQuery(
     async () => {
-      const [categories, bookings, addresses] = await Promise.all([
+      const [categories, bookings, addresses, offers] = await Promise.all([
         supabase.from('service_categories').select('*').eq('active', true).order('sort_order'),
         supabase
           .from('bookings')
@@ -41,14 +51,19 @@ export default function Home() {
           .not('status', 'in', `(${TERMINAL.join(',')})`)
           .order('created_at', { ascending: false }),
         supabase.from('customer_addresses').select('id', { count: 'exact', head: true }),
+        supabase.rpc('get_my_offers'),
       ]);
+      const cats = unwrap(categories);
       return {
-        categories: unwrap(categories),
+        categories: cats,
+        names: Object.fromEntries(cats.map((c) => [c.code, c.name])) as Record<string, string>,
         bookings: unwrap(bookings) as unknown as BookingWithRefs[],
         hasAddress: (addresses.count ?? 0) > 0,
+        // Offers are a bonus: if they fail to load, the rest of Home still works.
+        offers: (offers.error ? [] : (offers.data ?? [])) as Offer[],
       };
     },
-    { key: 'home', tables: ['bookings'] },
+    { key: 'home', tables: ['bookings', 'offers'] },
   );
 
   const firstName = profile?.full_name?.split(' ')[0];
@@ -66,7 +81,7 @@ export default function Home() {
         <Hero
           eyebrow="ManeMaid"
           title={firstName ? `Hi, ${firstName} 👋` : 'Welcome 👋'}
-          subtitle="What help do you need at home today?"
+          subtitle={config.homeTagline}
           right={
             <Pressable3D onPress={() => router.push('/profile')} accessibilityLabel="Profile">
               <Avatar name={profile?.full_name || 'You'} uri={photoUrl('avatars', profile?.avatar_path)} size={52} ring />
@@ -75,6 +90,7 @@ export default function Home() {
         />
       }
     >
+      <GreetingPopup />
       {q.loading ? (
         <Loading />
       ) : q.error ? (
@@ -100,6 +116,13 @@ export default function Home() {
               {needsYou.map((b, i) => (
                 <BookingListItem key={b.id} index={i} booking={b} audience="customer" onPress={() => router.push(`/booking/${b.id}`)} />
               ))}
+            </>
+          ) : null}
+
+          {config.offersEnabled && q.data?.offers.length ? (
+            <>
+              <SectionTitle>Offers for you</SectionTitle>
+              <OffersCarousel offers={q.data.offers} names={q.data.names} />
             </>
           ) : null}
 
@@ -131,21 +154,21 @@ export default function Home() {
           ) : null}
 
           <SectionTitle>Why ManeMaid</SectionTitle>
-          {[
-            { icon: 'shield-checkmark', tone: 'green', title: 'Verified by the agency', body: 'Background-checked staff with verified records.' },
-            { icon: 'thumbs-up', tone: 'orange', title: 'You approve every worker', body: 'Nothing is final until you say yes.' },
-            { icon: 'headset', tone: 'blue', title: 'Priority support', body: 'Raise a request any time. Paying customers get replies within 4 hours.' },
-          ].map((f, i) => (
-            <Card key={f.title} index={i} onPress={f.icon === 'headset' ? () => router.push('/support') : undefined}>
+          {config.whyManeMaid.map((f, i) => {
+            const style = WHY_STYLE[i % WHY_STYLE.length];
+            const opensSupport = style.icon === 'headset' && config.supportTickets;
+            return (
+            <Card key={`${i}-${f.title}`} index={i} onPress={opensSupport ? () => router.push('/support') : undefined}>
               <Row style={{ gap: space.md }}>
-                <Icon3D name={f.icon as 'shield-checkmark'} tone={f.tone as Tone} size={44} />
+                <Icon3D name={style.icon} tone={style.tone} size={44} />
                 <View style={{ flex: 1 }}>
                   <Strong style={{ fontSize: 15 }}>{f.title}</Strong>
                   <Muted>{f.body}</Muted>
                 </View>
               </Row>
             </Card>
-          ))}
+            );
+          })}
         </>
       )}
     </Screen>

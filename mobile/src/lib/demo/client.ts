@@ -103,7 +103,7 @@ export function createDemoClient(kv: KV) {
     },
     uid: () => session?.user.id ?? null,
     role: () => profileOf(session?.user.id ?? null)?.role ?? null,
-    isAgency: () => ['admin', 'coordinator'].includes(profileOf(session?.user.id ?? null)?.role),
+    isAgency: () => ['admin', 'coordinator', 'developer'].includes(profileOf(session?.user.id ?? null)?.role),
     commit: (...tables) => {
       save();
       const changed = new Set<string>(tables);
@@ -120,10 +120,19 @@ export function createDemoClient(kv: KV) {
   const ownsBooking = (id: string) => db.bookings.some((b) => b.id === id && b.customer_id === ctx.uid());
   const ownsTicket = (id: string) => db.support_tickets.some((t) => t.id === id && t.customer_id === ctx.uid());
   function visible(table: Table, r: Row): boolean {
+    // Legal texts are readable before sign-in (sign-in screen links to them).
+    if (table === 'legal_documents') return true;
     const me = ctx.uid();
     if (!me) return false;
     const agency = ctx.isAgency();
     switch (table) {
+      case 'app_config':
+        return true;
+      case 'offers':
+      case 'greetings':
+      case 'greeting_deliveries':
+        // Customers read these only through get_my_offers() / get_my_greetings().
+        return agency;
       case 'profiles':
         return agency || r.id === me;
       case 'service_categories':
@@ -157,7 +166,7 @@ export function createDemoClient(kv: KV) {
     switch (table) {
       case 'profiles':
         if (op !== 'update' || r.id !== me) throw denied();
-        if (Object.keys(patch ?? {}).some((k) => !['full_name', 'email', 'preferred_language', 'avatar_path'].includes(k))) throw denied();
+        if (Object.keys(patch ?? {}).some((k) => !['full_name', 'email', 'preferred_language', 'avatar_path', 'marketing_opt_in'].includes(k))) throw denied();
         return;
       case 'customer_addresses':
         if (r.customer_id !== me) throw new DemoError('new row violates row-level security policy', '42501');
@@ -166,6 +175,8 @@ export function createDemoClient(kv: KV) {
       case 'scope_templates':
       case 'service_categories':
       case 'service_zones':
+      case 'offers':
+      case 'greetings':
         if (!agency) throw new DemoError('new row violates row-level security policy', '42501');
         return;
       case 'agency_settings':
@@ -178,6 +189,9 @@ export function createDemoClient(kv: KV) {
 
   function beforeWrite(table: Table, r: Row, op: 'insert' | 'update', old?: Row) {
     const now = nowISO();
+    if (table === 'profiles' && op === 'update' && old && r.marketing_opt_in !== old.marketing_opt_in) {
+      r.marketing_opt_in_at = r.marketing_opt_in ? now : null;
+    }
     if (op === 'insert') r.created_at ??= now;
     if ('updated_at' in r || op === 'insert') r.updated_at = now;
     if (table === 'customer_addresses') {

@@ -13,6 +13,7 @@ import {
 import { usePopup } from '@/components/popup';
 import { Button, Card, ErrorState, Heading, Icon3D, Loading, Muted, Row, Screen, SectionTitle } from '@/components/ui';
 import { formatINR, type BookingStatus } from '@/lib/format';
+import { useAppConfig } from '@/lib/config';
 import { useLiveQuery } from '@/lib/hooks';
 import { supabase, unwrap } from '@/lib/supabase';
 import { colors, space, type Tone } from '@/lib/theme';
@@ -37,6 +38,7 @@ const WAITING: Partial<Record<BookingStatus, { icon: 'hourglass' | 'document-tex
 export default function CustomerBooking() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const popup = usePopup();
+  const { supportTickets } = useAppConfig();
   const q = useLiveQuery(() => fetchBookingBundle(id), { key: `booking:${id}`, tables: ['bookings'] });
 
   if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
@@ -195,6 +197,7 @@ export default function CustomerBooking() {
       <SectionTitle>Support</SectionTitle>
       <SupportCard support={support} />
 
+      {supportTickets ? (
       <Button
         label="Report an issue with this booking"
         icon="flag-outline"
@@ -202,6 +205,7 @@ export default function CustomerBooking() {
         style={{ marginBottom: space.md }}
         onPress={() => router.push({ pathname: '/support/new', params: { booking: booking.id } })}
       />
+      ) : null}
 
       <SectionTitle>Timeline</SectionTitle>
       <Timeline events={events} audience="customer" />

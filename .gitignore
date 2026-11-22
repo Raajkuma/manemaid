@@ -2,7 +2,6 @@ node_modules/
 dist/
 build/
 .cache/
-.env*
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
@@ -11,14 +10,14 @@ logs/
 *.log
 .claude-replay.*
 .tmp-*
-/.figma/design-context/
 
-# Platform-managed agentplat state, not project source. In the
-# client-initiated single-repo workspace layout (make's `Path: "."` spec) the
-# repo root IS the workspace root, so these land inside this repo rather than
-# beside it.
-/.plugins/
-/.opencode-skills/
+# Local environment files hold keys: never commit them. The .env.example
+# templates (placeholders only) are committed so others know what to set.
+.env*
+!.env.example
+
+# IDE settings
+.idea/
 
 # Supabase CLI local state (contains secrets)
 supabase/.temp/

@@ -51,6 +51,40 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"app_config": {
+                  Row: {
+                    "description": string | null,"is_public": boolean,"key": string,"updated_at": string,"updated_by": string | null,"value": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "description"?: string | null,"is_public"?: boolean,"key": string,"updated_at"?: string,"updated_by"?: string | null,"value": NonNullable<Json>
+                  }
+                  Update: {
+                    "description"?: string | null,"is_public"?: boolean,"key"?: string,"updated_at"?: string,"updated_by"?: string | null,"value"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "app_config_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"app_errors": {
+                  Row: {
+                    "app_version": string | null,"at": string,"id": number,"message": string,"platform": string | null,"route": string | null,"source": string,"stack": string | null,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "app_version"?: string | null,"at"?: string,"id"?: never,"message": string,"platform"?: string | null,"route"?: string | null,"source": string,"stack"?: string | null,"user_id"?: string | null
+                  }
+                  Update: {
+                    "app_version"?: string | null,"at"?: string,"id"?: never,"message"?: string,"platform"?: string | null,"route"?: string | null,"source"?: string,"stack"?: string | null,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"assignments": {
                   Row: {
                     "agency_note": string | null,"booking_id": string,"customer_note": string | null,"decided_at": string | null,"id": string,"proposed_at": string,"proposed_by": string | null,"staff_id": string,"status": Database["public"]['Enums']["assignment_status"]
@@ -82,6 +116,20 @@ isOneToOne: false
       referencedRelation: "staff"
       referencedColumns: ["id"]
     }
+                  ]
+                },"audit_log": {
+                  Row: {
+                    "action": string,"actor_id": string | null,"actor_role": Database["public"]['Enums']["user_role"] | null,"at": string,"changes": NonNullable<Json>,"id": number,"row_id": string | null,"table_name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"actor_id"?: string | null,"actor_role"?: Database["public"]['Enums']["user_role"] | null,"at"?: string,"changes"?: NonNullable<Json>,"id"?: never,"row_id"?: string | null,"table_name": string
+                  }
+                  Update: {
+                    "action"?: string,"actor_id"?: string | null,"actor_role"?: Database["public"]['Enums']["user_role"] | null,"at"?: string,"changes"?: NonNullable<Json>,"id"?: never,"row_id"?: string | null,"table_name"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"booking_events": {
                   Row: {
@@ -125,14 +173,14 @@ isOneToOne: false
                   ]
                 },"bookings": {
                   Row: {
-                    "address_id": string,"agreed_price": number | null,"assigned_staff_id": string | null,"category_code": string,"created_at": string,"customer_id": string,"days_of_week": (number)[],"engagement_type": Database["public"]['Enums']["engagement_type"],"hours_per_day": number | null,"household_size": number | null,"id": string,"language_prefs": (string)[],"paid_amount": number | null,"paid_at": string | null,"payment_method": string | null,"payment_reference": string | null,"payment_status": Database["public"]['Enums']["payment_status"],"reference": string,"rooms": number | null,"special_instructions": string | null,"start_date": string,"status": Database["public"]['Enums']["booking_status"],"status_reason": string | null,"time_end": string | null,"time_start": string | null,"trial_requested": boolean,"updated_at": string
+                    "address_id": string,"agreed_price": number | null,"assigned_staff_id": string | null,"category_code": string,"created_at": string,"customer_id": string,"days_of_week": (number)[],"engagement_type": Database["public"]['Enums']["engagement_type"],"hours_per_day": number | null,"household_size": number | null,"id": string,"language_prefs": (string)[],"offer_id": string | null,"offer_title": string | null,"paid_amount": number | null,"paid_at": string | null,"payment_method": string | null,"payment_reference": string | null,"payment_status": Database["public"]['Enums']["payment_status"],"reference": string,"rooms": number | null,"special_instructions": string | null,"start_date": string,"status": Database["public"]['Enums']["booking_status"],"status_reason": string | null,"time_end": string | null,"time_start": string | null,"trial_requested": boolean,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "address_id": string,"agreed_price"?: number | null,"assigned_staff_id"?: string | null,"category_code": string,"created_at"?: string,"customer_id": string,"days_of_week"?: (number)[],"engagement_type": Database["public"]['Enums']["engagement_type"],"hours_per_day"?: number | null,"household_size"?: number | null,"id"?: string,"language_prefs"?: (string)[],"paid_amount"?: number | null,"paid_at"?: string | null,"payment_method"?: string | null,"payment_reference"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"reference"?: string,"rooms"?: number | null,"special_instructions"?: string | null,"start_date": string,"status"?: Database["public"]['Enums']["booking_status"],"status_reason"?: string | null,"time_end"?: string | null,"time_start"?: string | null,"trial_requested"?: boolean,"updated_at"?: string
+                    "address_id": string,"agreed_price"?: number | null,"assigned_staff_id"?: string | null,"category_code": string,"created_at"?: string,"customer_id": string,"days_of_week"?: (number)[],"engagement_type": Database["public"]['Enums']["engagement_type"],"hours_per_day"?: number | null,"household_size"?: number | null,"id"?: string,"language_prefs"?: (string)[],"offer_id"?: string | null,"offer_title"?: string | null,"paid_amount"?: number | null,"paid_at"?: string | null,"payment_method"?: string | null,"payment_reference"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"reference"?: string,"rooms"?: number | null,"special_instructions"?: string | null,"start_date": string,"status"?: Database["public"]['Enums']["booking_status"],"status_reason"?: string | null,"time_end"?: string | null,"time_start"?: string | null,"trial_requested"?: boolean,"updated_at"?: string
                   }
                   Update: {
-                    "address_id"?: string,"agreed_price"?: number | null,"assigned_staff_id"?: string | null,"category_code"?: string,"created_at"?: string,"customer_id"?: string,"days_of_week"?: (number)[],"engagement_type"?: Database["public"]['Enums']["engagement_type"],"hours_per_day"?: number | null,"household_size"?: number | null,"id"?: string,"language_prefs"?: (string)[],"paid_amount"?: number | null,"paid_at"?: string | null,"payment_method"?: string | null,"payment_reference"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"reference"?: string,"rooms"?: number | null,"special_instructions"?: string | null,"start_date"?: string,"status"?: Database["public"]['Enums']["booking_status"],"status_reason"?: string | null,"time_end"?: string | null,"time_start"?: string | null,"trial_requested"?: boolean,"updated_at"?: string
+                    "address_id"?: string,"agreed_price"?: number | null,"assigned_staff_id"?: string | null,"category_code"?: string,"created_at"?: string,"customer_id"?: string,"days_of_week"?: (number)[],"engagement_type"?: Database["public"]['Enums']["engagement_type"],"hours_per_day"?: number | null,"household_size"?: number | null,"id"?: string,"language_prefs"?: (string)[],"offer_id"?: string | null,"offer_title"?: string | null,"paid_amount"?: number | null,"paid_at"?: string | null,"payment_method"?: string | null,"payment_reference"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"reference"?: string,"rooms"?: number | null,"special_instructions"?: string | null,"start_date"?: string,"status"?: Database["public"]['Enums']["booking_status"],"status_reason"?: string | null,"time_end"?: string | null,"time_start"?: string | null,"trial_requested"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -159,6 +207,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "bookings_offer_id_fkey"
+      columns: ["offer_id"]
+isOneToOne: false
+      referencedRelation: "offers"
+      referencedColumns: ["id"]
     }
                   ]
                 },"customer_addresses": {
@@ -176,6 +230,72 @@ isOneToOne: false
                     {
       foreignKeyName: "customer_addresses_customer_id_fkey"
       columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"greeting_deliveries": {
+                  Row: {
+                    "greeting_id": string,"seen_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "greeting_id": string,"seen_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "greeting_id"?: string,"seen_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "greeting_deliveries_greeting_id_fkey"
+      columns: ["greeting_id"]
+isOneToOne: false
+      referencedRelation: "greetings"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "greeting_deliveries_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"greetings": {
+                  Row: {
+                    "active": boolean,"audience": string,"created_at": string,"created_by": string | null,"ends_on": string,"id": string,"image_path": string | null,"message": string,"push_to_inbox": boolean,"starts_on": string,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "active"?: boolean,"audience"?: string,"created_at"?: string,"created_by"?: string | null,"ends_on": string,"id"?: string,"image_path"?: string | null,"message": string,"push_to_inbox"?: boolean,"starts_on": string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "active"?: boolean,"audience"?: string,"created_at"?: string,"created_by"?: string | null,"ends_on"?: string,"id"?: string,"image_path"?: string | null,"message"?: string,"push_to_inbox"?: boolean,"starts_on"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "greetings_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"legal_documents": {
+                  Row: {
+                    "body": string,"doc_type": string,"id": string,"published_at": string,"published_by": string | null,"title": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"doc_type": string,"id"?: string,"published_at"?: string,"published_by"?: string | null,"title": string,"version": number
+                  }
+                  Update: {
+                    "body"?: string,"doc_type"?: string,"id"?: string,"published_at"?: string,"published_by"?: string | null,"title"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "legal_documents_published_by_fkey"
+      columns: ["published_by"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
@@ -213,16 +333,42 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"profiles": {
+                },"offers": {
                   Row: {
-                    "avatar_path": string | null,"created_at": string,"email": string | null,"full_name": string | null,"id": string,"phone": string | null,"preferred_language": string,"role": Database["public"]['Enums']["user_role"],"updated_at": string
+                    "active": boolean,"audience": string,"body": string,"category_code": string | null,"created_at": string,"created_by": string | null,"ends_at": string | null,"id": string,"image_path": string | null,"sort_order": number,"starts_at": string,"terms": string | null,"title": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_path"?: string | null,"created_at"?: string,"email"?: string | null,"full_name"?: string | null,"id": string,"phone"?: string | null,"preferred_language"?: string,"role"?: Database["public"]['Enums']["user_role"],"updated_at"?: string
+                    "active"?: boolean,"audience"?: string,"body": string,"category_code"?: string | null,"created_at"?: string,"created_by"?: string | null,"ends_at"?: string | null,"id"?: string,"image_path"?: string | null,"sort_order"?: number,"starts_at"?: string,"terms"?: string | null,"title": string,"updated_at"?: string
                   }
                   Update: {
-                    "avatar_path"?: string | null,"created_at"?: string,"email"?: string | null,"full_name"?: string | null,"id"?: string,"phone"?: string | null,"preferred_language"?: string,"role"?: Database["public"]['Enums']["user_role"],"updated_at"?: string
+                    "active"?: boolean,"audience"?: string,"body"?: string,"category_code"?: string | null,"created_at"?: string,"created_by"?: string | null,"ends_at"?: string | null,"id"?: string,"image_path"?: string | null,"sort_order"?: number,"starts_at"?: string,"terms"?: string | null,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "offers_category_code_fkey"
+      columns: ["category_code"]
+isOneToOne: false
+      referencedRelation: "service_categories"
+      referencedColumns: ["code"]
+    },{
+      foreignKeyName: "offers_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"profiles": {
+                  Row: {
+                    "avatar_path": string | null,"created_at": string,"email": string | null,"full_name": string | null,"id": string,"marketing_opt_in": boolean,"marketing_opt_in_at": string | null,"phone": string | null,"preferred_language": string,"role": Database["public"]['Enums']["user_role"],"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "avatar_path"?: string | null,"created_at"?: string,"email"?: string | null,"full_name"?: string | null,"id": string,"marketing_opt_in"?: boolean,"marketing_opt_in_at"?: string | null,"phone"?: string | null,"preferred_language"?: string,"role"?: Database["public"]['Enums']["user_role"],"updated_at"?: string
+                  }
+                  Update: {
+                    "avatar_path"?: string | null,"created_at"?: string,"email"?: string | null,"full_name"?: string | null,"id"?: string,"marketing_opt_in"?: boolean,"marketing_opt_in_at"?: string | null,"phone"?: string | null,"preferred_language"?: string,"role"?: Database["public"]['Enums']["user_role"],"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -382,11 +528,20 @@ isOneToOne: false
             "_clean_languages":
 { Args: { "p_langs": (string)[] }; Returns: (string)[]
                            },
+"_greeting_for":
+{ Args: { "p_greeting": Omit<Database["public"]['Tables']["greetings"]['Row'], Database["public"]['Tables']["greetings"]['ComputedFields']>,"p_user": string }; Returns: boolean
+                           },
+"_mask_phones":
+{ Args: { "p": Json }; Returns: Json
+                           },
 "_notify_agency":
 { Args: { "p_body": string,"p_booking": string,"p_title": string }; Returns: undefined
                            },
 "_notify_ticket":
 { Args: { "p_body": string,"p_ticket": Omit<Database["public"]['Tables']["support_tickets"]['Row'], Database["public"]['Tables']["support_tickets"]['ComputedFields']>,"p_title": string,"p_to_agency": boolean }; Returns: undefined
+                           },
+"_offer_eligible":
+{ Args: { "p_category"?: string,"p_customer": string,"p_offer": Omit<Database["public"]['Tables']["offers"]['Row'], Database["public"]['Tables']["offers"]['ComputedFields']> }; Returns: boolean
                            },
 "_payment_event":
 { Args: { "p_booking": Omit<Database["public"]['Tables']["bookings"]['Row'], Database["public"]['Tables']["bookings"]['ComputedFields']>,"p_reason": string }; Returns: undefined
@@ -411,6 +566,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -447,6 +604,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -489,6 +648,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -541,8 +702,76 @@ isOneToOne: false
               "agency_note": string,"assignment_id": string,"assignment_status": Database["public"]['Enums']["assignment_status"],"bio": string,"categories": (string)[],"experience_years": number,"full_name": string,"languages": (string)[],"photo_url": string,"proposed_at": string,"rating": number,"skills": (string)[],"staff_id": string,"verification_status": Database["public"]['Enums']["verification_status"],"verified_at": string
             }[]
                            },
+"get_my_greetings":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "active": boolean,
+"audience": string,
+"created_at": string,
+"created_by": string | null,
+"ends_on": string,
+"id": string,
+"image_path": string | null,
+"message": string,
+"push_to_inbox": boolean,
+"starts_on": string,
+"title": string,
+"updated_at": string
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "greetings"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"get_my_offers":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "active": boolean,
+"audience": string,
+"body": string,
+"category_code": string | null,
+"created_at": string,
+"created_by": string | null,
+"ends_at": string | null,
+"id": string,
+"image_path": string | null,
+"sort_order": number,
+"starts_at": string,
+"terms": string | null,
+"title": string,
+"updated_at": string
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "offers"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"get_public_config":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "key": string,"value": Json
+            }[]
+                           },
+"get_signin_log":
+{ Args: { "p_limit"?: number,"p_offset"?: number }; Returns: {
+              "action": string,"at": string,"full_name": string,"phone": string,"role": Database["public"]['Enums']["user_role"],"user_id": string
+            }[]
+                           },
+"india_today":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "is_agency":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"is_developer":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"list_staff_access":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "full_name": string,"last_sign_in_at": string,"phone": string,"role": Database["public"]['Enums']["user_role"],"signed_up": boolean,"user_id": string
+            }[]
+                           },
+"mark_greeting_seen":
+{ Args: { "p_greeting_id": string }; Returns: undefined
                            },
 "mark_notifications_read":
 { Args: { "p_ids"?: (string)[] }; Returns: undefined
@@ -585,6 +814,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -607,6 +838,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"remove_staff_access":
+{ Args: { "p_phone": string }; Returns: undefined
+                           },
 "reply_to_ticket":
 { Args: { "p_message": string,"p_ticket_id": string }; Returns: {
               "author_id": string | null,
@@ -622,6 +856,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"report_error":
+{ Args: { "p_app_version"?: string,"p_message": string,"p_platform"?: string,"p_route"?: string,"p_source": string,"p_stack"?: string }; Returns: undefined
+                           },
 "respond_quotation":
 { Args: { "p_accept": boolean,"p_note"?: string,"p_quotation_id": string }; Returns: {
               "address_id": string,
@@ -636,6 +873,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -672,6 +911,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -717,6 +958,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"set_staff_access":
+{ Args: { "p_full_name"?: string,"p_phone": string,"p_role": Database["public"]['Enums']["user_role"] }; Returns: undefined
+                           },
 "set_ticket_priority":
 { Args: { "p_priority": Database["public"]['Enums']["ticket_priority"],"p_ticket_id": string }; Returns: {
               "booking_id": string | null,
@@ -767,7 +1011,7 @@ isOneToOne: false
             }[]
                            },
 "submit_enquiry":
-{ Args: { "p_address_id": string,"p_category_code": string,"p_days_of_week": (number)[],"p_engagement_type": Database["public"]['Enums']["engagement_type"],"p_hours_per_day"?: number,"p_household_size"?: number,"p_language_prefs"?: (string)[],"p_rooms"?: number,"p_special_instructions"?: string,"p_start_date": string,"p_time_end"?: string,"p_time_start"?: string,"p_trial_requested"?: boolean }; Returns: {
+{ Args: { "p_address_id": string,"p_category_code": string,"p_days_of_week": (number)[],"p_engagement_type": Database["public"]['Enums']["engagement_type"],"p_hours_per_day"?: number,"p_household_size"?: number,"p_language_prefs"?: (string)[],"p_offer_id"?: string,"p_rooms"?: number,"p_special_instructions"?: string,"p_start_date": string,"p_time_end"?: string,"p_time_start"?: string,"p_trial_requested"?: boolean }; Returns: {
               "address_id": string,
 "agreed_price": number | null,
 "assigned_staff_id": string | null,
@@ -780,6 +1024,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -816,6 +1062,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -855,6 +1103,8 @@ isOneToOne: false
 "household_size": number | null,
 "id": string,
 "language_prefs": (string)[],
+"offer_id": string | null,
+"offer_title": string | null,
 "paid_amount": number | null,
 "paid_at": string | null,
 "payment_method": string | null,
@@ -879,7 +1129,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "assignment_status": "proposed"|"approved"|"rejected"|"withdrawn"|"ended","booking_status": "enquiry_submitted"|"under_review"|"quotation_sent"|"staff_matching"|"staff_proposed"|"confirmed"|"active"|"completed"|"cancelled_by_customer"|"cancelled_by_agency"|"unable_to_serve","engagement_type": "hourly"|"daily"|"part_time"|"full_time"|"monthly"|"live_in","payment_status": "unpaid"|"pending_verification"|"paid","quotation_status": "sent"|"accepted"|"rejected"|"superseded","staff_status": "available"|"assigned"|"on_leave"|"inactive","ticket_priority": "normal"|"high"|"urgent","ticket_status": "open"|"in_progress"|"resolved"|"closed","user_role": "customer"|"coordinator"|"admin","verification_status": "pending"|"in_progress"|"verified"|"rejected"
+            "assignment_status": "proposed"|"approved"|"rejected"|"withdrawn"|"ended","booking_status": "enquiry_submitted"|"under_review"|"quotation_sent"|"staff_matching"|"staff_proposed"|"confirmed"|"active"|"completed"|"cancelled_by_customer"|"cancelled_by_agency"|"unable_to_serve","engagement_type": "hourly"|"daily"|"part_time"|"full_time"|"monthly"|"live_in","payment_status": "unpaid"|"pending_verification"|"paid","quotation_status": "sent"|"accepted"|"rejected"|"superseded","staff_status": "available"|"assigned"|"on_leave"|"inactive","ticket_priority": "normal"|"high"|"urgent","ticket_status": "open"|"in_progress"|"resolved"|"closed","user_role": "customer"|"coordinator"|"admin"|"developer","verification_status": "pending"|"in_progress"|"verified"|"rejected"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -999,7 +1249,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "assignment_status": ["proposed", "approved", "rejected", "withdrawn", "ended"],"booking_status": ["enquiry_submitted", "under_review", "quotation_sent", "staff_matching", "staff_proposed", "confirmed", "active", "completed", "cancelled_by_customer", "cancelled_by_agency", "unable_to_serve"],"engagement_type": ["hourly", "daily", "part_time", "full_time", "monthly", "live_in"],"payment_status": ["unpaid", "pending_verification", "paid"],"quotation_status": ["sent", "accepted", "rejected", "superseded"],"staff_status": ["available", "assigned", "on_leave", "inactive"],"ticket_priority": ["normal", "high", "urgent"],"ticket_status": ["open", "in_progress", "resolved", "closed"],"user_role": ["customer", "coordinator", "admin"],"verification_status": ["pending", "in_progress", "verified", "rejected"]
+            "assignment_status": ["proposed", "approved", "rejected", "withdrawn", "ended"],"booking_status": ["enquiry_submitted", "under_review", "quotation_sent", "staff_matching", "staff_proposed", "confirmed", "active", "completed", "cancelled_by_customer", "cancelled_by_agency", "unable_to_serve"],"engagement_type": ["hourly", "daily", "part_time", "full_time", "monthly", "live_in"],"payment_status": ["unpaid", "pending_verification", "paid"],"quotation_status": ["sent", "accepted", "rejected", "superseded"],"staff_status": ["available", "assigned", "on_leave", "inactive"],"ticket_priority": ["normal", "high", "urgent"],"ticket_status": ["open", "in_progress", "resolved", "closed"],"user_role": ["customer", "coordinator", "admin", "developer"],"verification_status": ["pending", "in_progress", "verified", "rejected"]
           }
         }
 } as const

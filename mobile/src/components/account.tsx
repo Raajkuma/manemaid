@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Switch, Text, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 
+import { useAppConfig } from '@/lib/config';
 import { TERMINAL } from '@/lib/format';
 import { useLiveQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
@@ -184,6 +185,7 @@ function SignOutButton() {
 
 export function CustomerProfileScreen() {
   const popup = usePopup();
+  const config = useAppConfig();
   const q = useLiveQuery(
     async () => {
       const [addresses, bookings, support] = await Promise.all([
@@ -260,7 +262,10 @@ export function CustomerProfileScreen() {
         </>
       )}
 
+      <EmailOffersCard />
+
       <SectionTitle>Help & account</SectionTitle>
+      {config.supportTickets ? (
       <MenuRow
         icon={q.data?.support.unlocked ? 'star' : 'headset'}
         tone={q.data?.support.unlocked ? 'orange' : 'green'}
@@ -270,6 +275,7 @@ export function CustomerProfileScreen() {
         onPress={() => router.push('/support')}
         index={0}
       />
+      ) : null}
       <MenuRow icon="document-text" tone="blue" title="Terms & privacy" subtitle="How we work, and how we protect your data" onPress={() => router.push('/legal')} index={1} />
       <DemoControls current="customer" />
       <SignOutButton />
@@ -281,16 +287,100 @@ export function AgencyAccountScreen() {
   return (
     <Screen hero={<Hero title="" eyebrow="Agency account"><ProfileHeader /></Hero>}>
       <SectionTitle>Agency tools</SectionTitle>
-      <MenuRow icon="business" title="Agency settings" subtitle="Support numbers, WhatsApp, hours and UPI ID" onPress={() => router.push('/agency-settings')} index={0} />
-      <MenuRow icon="document-text" tone="orange" title="Scope templates" subtitle="Reusable scopes for quotations" onPress={() => router.push('/templates')} index={1} />
-      <MenuRow icon="person-add" tone="green" title="Add staff member" subtitle="Photo, contacts, skills and verification" onPress={() => router.push('/staff-form')} index={2} />
-      <MenuRow icon="chatbubbles" tone="blue" title="Support requests" subtitle="Customer requests, urgent first" onPress={() => router.push('/tickets')} index={3} />
-      <MenuRow icon="document-text" tone="neutral" title="Terms & privacy" subtitle="What customers agree to" onPress={() => router.push('/legal')} index={4} />
-      <Card index={5} style={{ backgroundColor: colors.primarySoft }}>
+      <MenuRow icon="pricetag" tone="orange" title="Offers" subtitle="Post and schedule offers for customers" onPress={() => router.push('/offers')} index={0} />
+      <MenuRow icon="gift" tone="primary" title="Greetings" subtitle="Festival and celebration wishes" onPress={() => router.push('/greetings')} index={1} />
+      <MenuRow icon="business" title="Agency settings" subtitle="Support numbers, WhatsApp, hours and UPI ID" onPress={() => router.push('/agency-settings')} index={2} />
+      <MenuRow icon="document-text" tone="orange" title="Scope templates" subtitle="Reusable scopes for quotations" onPress={() => router.push('/templates')} index={3} />
+      <MenuRow icon="person-add" tone="green" title="Add staff member" subtitle="Photo, contacts, skills and verification" onPress={() => router.push('/staff-form')} index={4} />
+      <MenuRow icon="chatbubbles" tone="blue" title="Support requests" subtitle="Customer requests, urgent first" onPress={() => router.push('/tickets')} index={5} />
+      <MenuRow icon="document-text" tone="neutral" title="Terms & privacy" subtitle="What customers agree to" onPress={() => router.push('/legal')} index={6} />
+      <Card index={7} style={{ backgroundColor: colors.primarySoft }}>
         <Muted style={{ color: colors.primaryDark }}>Service areas and categories can be edited in Supabase Studio.</Muted>
       </Card>
       <DemoControls current="agency" />
       <SignOutButton />
     </Screen>
+  );
+}
+
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Customer email + consent for offer emails (marketing_opt_in, recorded with a timestamp). */
+function EmailOffersCard() {
+  const { profile, refreshProfile } = useSession();
+  const popup = usePopup();
+  const [saving, setSaving] = useState(false);
+  if (!profile) return null;
+  const email = profile.email;
+
+  function editEmail(thenOptIn = false) {
+    void popup.confirm({
+      title: email ? 'Your email' : 'Add your email',
+      message: 'We use it to send booking updates and, if you agree, offers.',
+      icon: 'mail',
+      reason: 'required',
+      reasonLabel: 'Email address',
+      reasonPlaceholder: 'name@example.com',
+      reasonInitial: email ?? '',
+      reasonSingleLine: true,
+      reasonKeyboard: 'email-address',
+      reasonRequiredMessage: 'Please enter your email address.',
+      reasonValidate: (t) => (EMAIL_RE.test(t) ? null : 'That does not look like an email address.'),
+      confirmLabel: 'Save',
+      onConfirm: async (value) => {
+        const patch: { email: string; marketing_opt_in?: boolean } = { email: value.trim().toLowerCase() };
+        if (thenOptIn) patch.marketing_opt_in = true;
+        unwrap(await supabase.from('profiles').update(patch).eq('id', profile!.id).select().single());
+        await refreshProfile();
+      },
+      success: { title: thenOptIn ? 'You will get our offers' : 'Email saved' },
+    });
+  }
+
+  async function setOptIn(on: boolean) {
+    if (on && !email) return editEmail(true);
+    setSaving(true);
+    try {
+      unwrap(await supabase.from('profiles').update({ marketing_opt_in: on }).eq('id', profile!.id).select().single());
+      await refreshProfile();
+    } catch (e) {
+      popup.error('Could not save', e);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <SectionTitle>Email & offers</SectionTitle>
+      <Card>
+        <Pressable3D onPress={() => editEmail()} accessibilityLabel={email ? 'Change email' : 'Add email'} tilt={4}>
+          <Row style={{ gap: space.md }}>
+            <Icon3D name="mail" tone="blue" size={40} />
+            <View style={{ flex: 1 }}>
+              <Strong style={{ fontSize: 15 }}>{email ?? 'Add your email'}</Strong>
+              <Muted>{email ? 'Tap to change' : 'For booking updates and offers'}</Muted>
+            </View>
+            <Ionicons name="create-outline" size={20} color={colors.muted} />
+          </Row>
+        </Pressable3D>
+        <View style={{ height: 1, backgroundColor: colors.line, marginVertical: space.md }} />
+        <Row style={{ gap: space.md }}>
+          <View style={{ flex: 1 }}>
+            <Strong style={{ fontSize: 15 }}>Send me offers by email</Strong>
+            <Muted>New plans and discounts. You can turn this off any time.</Muted>
+          </View>
+          <Switch
+            value={profile.marketing_opt_in}
+            onValueChange={(v) => void setOptIn(v)}
+            disabled={saving}
+            trackColor={{ true: colors.primary, false: colors.line }}
+            thumbColor="#fff"
+            accessibilityLabel="Send me offers by email"
+          />
+        </Row>
+      </Card>
+    </>
   );
 }

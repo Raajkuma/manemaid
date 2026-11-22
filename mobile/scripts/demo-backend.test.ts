@@ -48,7 +48,25 @@ async function main() {
   today.setDate(today.getDate() + 3);
   const p = (x: number) => String(x).padStart(2, '0');
   const start = `${today.getFullYear()}-${p(today.getMonth() + 1)}-${p(today.getDate())}`;
-  const bk = ok('submit enquiry', await c.rpc('submit_enquiry', { p_address_id: addr.id, p_category_code: 'home_care', p_engagement_type: 'part_time', p_start_date: start, p_days_of_week: [1, 3], p_time_start: '13:00', p_time_end: '14:00', p_language_prefs: ['Tamil', ' Hindi ', 'Any', 'Tamil'] }));
+  // ---- offers (customer side)
+  const myOffers = ok('my offers', await c.rpc('get_my_offers'));
+  check('new customer sees both sample offers', ['offer-welcome', 'offer-festive'].every((id) => myOffers.some((o: any) => o.id === id)));
+  check('customers cannot read the offers table', (ok('offers table', await c.from('offers').select('*'))).length === 0);
+  check('offer for another service rejected', !!(await c.rpc('submit_enquiry', { p_address_id: addr.id, p_category_code: 'home_care', p_engagement_type: 'part_time', p_start_date: start, p_days_of_week: [2], p_time_start: '09:00', p_time_end: '10:00', p_offer_id: 'offer-festive' })).error);
+  check('public config readable', (ok('public config', await c.rpc('get_public_config'))).some((r: any) => r.key === 'app.maintenance'));
+  check('error report is a no-op', !(await c.rpc('report_error', { p_source: 'mobile', p_message: 'x' })).error);
+
+  const bk = ok('submit enquiry', await c.rpc('submit_enquiry', { p_address_id: addr.id, p_category_code: 'home_care', p_engagement_type: 'part_time', p_start_date: start, p_days_of_week: [1, 3], p_time_start: '13:00', p_time_end: '14:00', p_language_prefs: ['Tamil', ' Hindi ', 'Any', 'Tamil'], p_offer_id: 'offer-welcome' }));
+  check('booking keeps the claimed offer', bk.offer_id === 'offer-welcome' && bk.offer_title?.startsWith('Welcome offer'));
+  check('welcome offer gone after first booking', !(ok('my offers 2', await c.rpc('get_my_offers'))).some((o: any) => o.id === 'offer-welcome'));
+  const greetings = ok('my greetings', await c.rpc('get_my_greetings'));
+  check('customer has the sample greeting', greetings.some((g: any) => g.id === 'greeting-welcome'));
+  ok('greeting seen', await c.rpc('mark_greeting_seen', { p_greeting_id: 'greeting-welcome' }));
+  ok('greeting seen twice', await c.rpc('mark_greeting_seen', { p_greeting_id: 'greeting-welcome' }));
+  check('greeting not shown again', !(ok('my greetings 2', await c.rpc('get_my_greetings'))).some((g: any) => g.id === 'greeting-welcome'));
+  check('greeting copied to Inbox once', (ok('inbox', await c.from('notifications').select('*'))).filter((n: any) => n.title === '🎉 Welcome to ManeMaid!').length === 1);
+  const consent = ok('opt in to offer emails', await c.from('profiles').update({ email: 'demo@example.com', marketing_opt_in: true }).eq('id', me.id).select().single());
+  check('consent time recorded', !!consent.marketing_opt_in_at);
   check('languages cleaned', JSON.stringify(bk.language_prefs) === '["Tamil","Hindi"]', JSON.stringify(bk.language_prefs));
   await tick();
   check('realtime fired on bookings', live > 0);
@@ -58,6 +76,9 @@ async function main() {
 
   // ---- agency
   ok('switch to agency', await c.auth.verifyOtp({ phone: '+919999900099', token: '123456', type: 'sms' }));
+  check('agency sees all offers', (ok('agency offers', await c.from('offers').select('*'))).length >= 2);
+  const notes = ok('agency inbox', await c.from('notifications').select('*'));
+  check('agency told about the claimed offer', notes.some((n: any) => n.body.includes('claimed offer: Welcome offer')));
   const all = ok('agency queue', await c.from('bookings').select('*, customer_addresses(*), service_categories(name), profiles(full_name, phone, avatar_path)').order('updated_at', { ascending: false }).limit(200));
   check('agency sees all bookings incl. samples', all.length === 4, `n=${all.length}`);
   const unread = await c.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null);

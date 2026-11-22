@@ -17,6 +17,7 @@ import {
   timeAgo,
   type BookingStatus,
 } from '@/lib/format';
+import { useAppConfig } from '@/lib/config';
 import { tapFeedback } from '@/lib/feedback';
 import { openLink } from '@/lib/links';
 import { photoUrl } from '@/lib/storage';
@@ -115,6 +116,7 @@ export function BookingListItem({
           <Row style={{ marginTop: 6, flexWrap: 'wrap' }}>
             <StatusBadge status={booking.status} audience={audience} />
             {showPay ? <PaymentBadge status={booking.payment_status} /> : null}
+            {booking.offer_title ? <Badge label="Offer" tone="orange" icon="pricetag" /> : null}
           </Row>
         </View>
       </Row>
@@ -157,6 +159,7 @@ export function BookingSummary({ booking, audience }: { booking: BookingWithRefs
         {booking.household_size ? <KeyValue label="Household" value={`${booking.household_size} people`} /> : null}
         {booking.rooms ? <KeyValue label="Rooms" value={String(booking.rooms)} /> : null}
         <KeyValue label="Languages" value={languagesLabel(booking.language_prefs)} />
+        {booking.offer_title ? <KeyValue label={audience === 'agency' ? 'Offer claimed' : 'Offer'} value={booking.offer_title} /> : null}
         <KeyValue label="Trial" value={booking.trial_requested ? 'Requested' : 'No'} />
         {booking.agreed_price != null ? <KeyValue label="Agreed price" value={`${formatINR(booking.agreed_price)} / month`} /> : null}
         {a ? (
@@ -296,6 +299,7 @@ export function PaymentCard({
   onPaid: () => Promise<void> | void;
 }) {
   const popup = usePopup();
+  const { upiPayments } = useAppConfig();
   const amount = Number(booking.agreed_price ?? 0);
 
   if (booking.payment_status === 'paid') return null;
@@ -314,7 +318,8 @@ export function PaymentCard({
     );
   }
 
-  if (!support.upi_id) {
+  // No UPI ID set, or UPI switched off in live config: the agency collects payment offline.
+  if (!support.upi_id || !upiPayments) {
     return (
       <Card tone="primary">
         <Row style={{ gap: space.md }}>
@@ -409,6 +414,8 @@ export function PaymentCard({
 }
 
 function SupportCentreLink() {
+  const { supportTickets } = useAppConfig();
+  if (!supportTickets) return null;
   return (
     <Button
       small
@@ -423,6 +430,7 @@ function SupportCentreLink() {
 
 export function SupportCard({ support, showCentreLink = true }: { support: AgencySupport; showCentreLink?: boolean }) {
   const popup = usePopup();
+  const { supportTickets } = useAppConfig();
   if (!support.unlocked) {
     return (
       <Card>
@@ -494,7 +502,7 @@ export function SupportCard({ support, showCentreLink = true }: { support: Agenc
             />
           ) : null}
         </Row>
-        {showCentreLink ? (
+        {showCentreLink && supportTickets ? (
           <Button variant="secondary" icon="chatbubbles-outline" label="Raise a priority request" onPress={() => router.push('/support/new')} />
         ) : null}
       </View>

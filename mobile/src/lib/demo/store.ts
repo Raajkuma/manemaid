@@ -27,6 +27,11 @@ export const TABLES = [
   'scope_templates',
   'support_tickets',
   'ticket_messages',
+  'offers',
+  'app_config',
+  'legal_documents',
+  'greetings',
+  'greeting_deliveries',
 ] as const;
 export type Table = (typeof TABLES)[number];
 
@@ -251,6 +256,43 @@ export function seed(): DB {
   db.notifications.push(
     note(`New enquiry ${b3.reference}`, 'A customer submitted a new service request.', b3.id, 1),
     note('⭐ Priority support request SR-1001', 'Staff arrived 40 minutes late', b1.id, 6, 'tk-riya'),
+  );
+
+  // Offers managed by the agency (web portal in the real app).
+  const inDays = (d: number) => new Date(Date.now() + d * 24 * 3600_000).toISOString();
+  db.offers.push(
+    {
+      id: 'offer-welcome', title: 'Welcome offer: 20% off your first month',
+      body: 'New to ManeMaid? Book any home-care service and get 20% off the first month of service.',
+      terms: 'For new customers only. Applied in your quotation. One offer per customer.',
+      image_path: null, category_code: null, audience: 'new_customers', starts_at: ago(24), ends_at: inDays(30),
+      active: true, sort_order: 1, created_by: DEMO_AGENCY_ID, created_at: ago(24), updated_at: ago(24),
+    },
+    {
+      id: 'offer-festive', title: 'Festive deep cleaning',
+      body: 'Get your home festival-ready: a full deep clean with a free kitchen degreasing add-on.',
+      terms: 'Valid for housekeeping bookings starting before the offer ends.',
+      image_path: null, category_code: 'housekeeping', audience: 'all', starts_at: ago(24), ends_at: inDays(14),
+      active: true, sort_order: 2, created_by: DEMO_AGENCY_ID, created_at: ago(24), updated_at: ago(24),
+    },
+  );
+
+  // A celebration greeting running today (India date), shown once to every customer.
+  const indiaToday = new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 10);
+  db.greetings.push({
+    id: 'greeting-welcome', title: 'Welcome to ManeMaid!', message: 'Thank you for trying ManeMaid. Wishing you a happy, stress-free home.',
+    image_path: null, audience: 'all', starts_on: indiaToday, ends_on: indiaToday, push_to_inbox: true, active: true,
+    created_by: DEMO_AGENCY_ID, created_at: ago(2), updated_at: ago(2),
+  });
+
+  // Live configuration (edited in the web portal's developer console in the real app).
+  const cfg = (key: string, value: unknown, is_public = false) => ({ key, value, description: null, is_public, updated_by: null, updated_at: ago(24) });
+  db.app_config.push(
+    cfg('features.offers_enabled', true),
+    cfg('features.upi_payments', true),
+    cfg('features.support_tickets', true),
+    cfg('app.min_version', '1.0.0', true),
+    cfg('app.maintenance', { enabled: false, message: 'ManeMaid is being upgraded. Please try again in a little while.' }, true),
   );
   return db;
 }

@@ -96,7 +96,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     // Only true during app launch. Later profile loads (e.g. right after sign-in) keep the
     // navigator mounted; the route guards simply wait for the profile.
     loading: bootUserId === undefined || (bootUserId !== null && profileLoading && loaded?.userId !== bootUserId),
-    isAgency: profile?.role === 'admin' || profile?.role === 'coordinator',
+    // Developers have full agency access (and the web portal's developer console).
+    isAgency: profile?.role === 'admin' || profile?.role === 'coordinator' || profile?.role === 'developer',
     refreshProfile,
     signOut,
   };

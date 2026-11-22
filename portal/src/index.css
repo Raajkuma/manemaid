@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+
+/* ManeMaid console design tokens. Colours follow the mobile app's palette
+   (mobile/src/lib/theme.ts); dark mode redefines the same tokens. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #f4f2ff;
+  --color-brand-100: #eeebff;
+  --color-brand-200: #d9d3ff;
+  --color-brand-300: #b9adff;
+  --color-brand-400: #8e7bff;
+  --color-brand-500: #6759d1;
+  --color-brand-600: #5a4bc6;
+  --color-brand-700: #4b3fb0;
+  --color-brand-800: #3a3190;
+  --color-brand-900: #2a2468;
+
+  --color-canvas: var(--mm-canvas);
+  --color-surface: var(--mm-surface);
+  --color-surface-2: var(--mm-surface-2);
+  --color-line: var(--mm-line);
+  --color-ink: var(--mm-ink);
+  --color-ink-soft: var(--mm-ink-soft);
+  --color-muted: var(--mm-muted);
+
+  --color-ok: #22a06b;
+  --color-ok-soft: var(--mm-ok-soft);
+  --color-warn: #e07b39;
+  --color-warn-soft: var(--mm-warn-soft);
+  --color-info: #3d86d6;
+  --color-info-soft: var(--mm-info-soft);
+  --color-bad: #d64b57;
+  --color-bad-soft: var(--mm-bad-soft);
+  --color-accent-soft: var(--mm-accent-soft);
+
+  --shadow-card: 0 1px 2px rgb(27 31 59 / 0.04), 0 4px 16px rgb(27 31 59 / 0.05);
+  --shadow-pop: 0 12px 40px rgb(27 31 59 / 0.18);
+}
+
+@layer base {
+  :root {
+    --mm-canvas: #f6f5fb;
+    --mm-surface: #ffffff;
+    --mm-surface-2: #faf9fd;
+    --mm-line: #ecebf4;
+    --mm-ink: #1b1f3b;
+    --mm-ink-soft: #3a3f63;
+    --mm-muted: #7a8098;
+    --mm-ok-soft: #e4f7ee;
+    --mm-warn-soft: #fff0e4;
+    --mm-info-soft: #e7f1ff;
+    --mm-bad-soft: #ffedef;
+    --mm-accent-soft: #eeebff;
+    color-scheme: light;
+  }
+  .dark {
+    --mm-canvas: #12131f;
+    --mm-surface: #1b1d2c;
+    --mm-surface-2: #212336;
+    --mm-line: #2c2f45;
+    --mm-ink: #eceaf8;
+    --mm-ink-soft: #c9c7dc;
+    --mm-muted: #8f93ad;
+    --mm-ok-soft: #133528;
+    --mm-warn-soft: #3a2616;
+    --mm-info-soft: #16294a;
+    --mm-bad-soft: #3c1a20;
+    --mm-accent-soft: #2a2550;
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}

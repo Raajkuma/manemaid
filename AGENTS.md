@@ -1,37 +1,34 @@
-# figma-make-app
+# ManeMaid
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+Agency-managed home-help booking platform. Three parts share one Supabase backend:
 
-## Development Server
+| Folder | What | Run |
+|---|---|---|
+| `supabase/` | Postgres schema, row-level security, business logic (RPCs), pgTAP tests | `npx supabase start` (Docker) from the repo root |
+| `mobile/` | Expo (React Native) app for customers and agency staff — iOS, Android, web | `cd mobile && npx expo start --port 8082` |
+| `portal/` | Web console for agency staff (offers) and developers (logs, live configuration) | `cd portal && npm run dev` → http://localhost:5173 |
 
-A Vite development server is **already running** on `$PORT` (default 8443). You don't need to start it manually.
+`PRD.md` is the product requirements document.
 
-- Preview URL: The user can access the running app through the preview panel
-- Hot reload: Changes to source files are reflected immediately
+## Rules that matter
 
-## Project Structure
+- **One backend, no secret keys in clients.** Apps and portal use only the Supabase *publishable* key. Every write goes through RLS or a `security definer` function with role checks. Never put the service-role key in `mobile/` or `portal/`.
+- **Roles** (`profiles.role`): `customer`, `admin`, `coordinator`, `developer`. `public.is_agency()` is true for admin/coordinator/developer; `public.is_developer()` only for developers. Staff access comes from `admin_phones` (managed with `set_staff_access` / `remove_staff_access`).
+- **Phone numbers**: the apps send `+91` + 10 digits; the database stores `91XXXXXXXXXX`. Use `public.normalize_in_phone` server-side and `portal/src/lib/phone.ts` in the portal so one person never gets two accounts.
+- **Schema changes = a new migration** in `supabase/migrations/` (never edit an applied one). Adding an enum value needs its own migration. If a function's signature changes, `drop` + `create` it and re-apply grants (an overload makes PostgREST calls ambiguous). Then regenerate types:
+  `npx supabase gen types typescript --local > mobile/src/lib/database.types.ts` and copy it to `portal/src/lib/database.types.ts`.
+- **Live configuration**: day-to-day settings live in `public.app_config` (read by `mobile/src/lib/config.tsx`, edited in the portal's developer console) — prefer a config key over a code change when something should be adjustable without an app release.
+- **Activity log**: `public.audit_log` is append-only, written by the `_audit()` trigger. Add the trigger to new business tables.
+- The mobile app also has an **offline demo backend** (`mobile/src/lib/demo/`) that mirrors server rules — update it when you add tables or RPCs the app uses.
 
-This is the canonical project structure. Start with task-relevant files below. Only follow imports or inspect other files when required, when a documented path is missing, or when the repository contradicts this guide.
+## Checks
 
-- `src/main.tsx` - React entrypoint; imports `src/index.css` and mounts `src/App.tsx` into the `#root` element
-- `src/App.tsx` - Primary application component and the usual starting point for UI work
-- `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
-- `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
-- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
-- `.mise.toml` - Toolchain versions for Node.js and pnpm
+```bash
+npx supabase test db                      # pgTAP (from repo root)
+cd mobile && npx tsc --noEmit && npx expo lint
+cd mobile && npm run test:live            # end-to-end against local Supabase
+cd mobile && npm run test:demo            # offline demo backend
+cd portal && npm run build                # typecheck + production build
+```
 
-## Dependencies
-
-- Runtime: React 19 and React DOM 19
-- Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
-- Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
-- Formatting: oxfmt
-
-## Styling
-
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
-
-`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
-
-Tailwind emits utility classes in `@layer utilities`, and CSS outside any cascade layer overrides every layer regardless of specificity. Put global element styles, such as resets and defaults for `body`, headings, `button`, or `input`, inside `@layer base { ... }` so utility classes on those elements still apply. Tailwind's Preflight already applies `box-sizing: border-box`, removes default margins, and sets `font: inherit` on form controls, so do not repeat those rules.
+Test logins (local only, code `123456`): `99999 00001` / `99999 00002` customers, `99999 00099` agency admin, `99999 00098` developer.

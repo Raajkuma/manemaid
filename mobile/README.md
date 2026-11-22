@@ -43,6 +43,7 @@ Windows Firewall for Private networks, and make sure the phone and PC are on the
 | 99999 00001 | Customer A |
 | 99999 00002 | Customer B |
 | 99999 00099 | Agency admin |
+| 99999 00098 | Developer (agency access + web portal developer console) |
 
 ## What's in the app
 
@@ -68,6 +69,14 @@ emergency contact, services, languages, verification) · agency settings (suppor
 booking) and chat with the agency in a thread. Priority is set by the server: safety = urgent
 (1 hour), paying customers = priority (4 hours), others = standard (24 hours). The agency has a
 Support tab (urgent first) to reply, re-prioritise, resolve and close.
+
+**Offers, greetings & live settings**: an "Offers for you" carousel on the customer Home; booking from
+an offer tags the request so the agency applies it in the quote. Celebration greetings pop up once on
+the chosen days (`src/components/greeting.tsx`). Agency staff manage both in the app (Account → Agency
+tools → Offers / Greetings) or in the web portal (`../portal/`) — same data.
+Feature switches, Home text, maintenance mode and a minimum app version come from `app_config`
+(`src/lib/config.tsx`) and update open apps live. Crashes are reported to the portal (`src/lib/errors.ts`).
+Customers can add an email and opt in to offer emails (consent time is recorded).
 
 **Terms & Privacy**: in-app Terms of Service and Privacy Policy (`src/content/legal.ts`), reachable
 from the profile, the agency account and the sign-in screen. This is a draft and needs legal review before launch.

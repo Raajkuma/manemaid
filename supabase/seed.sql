@@ -2,9 +2,11 @@
 -- Matches the sample data in the Figma prototype (src/App.tsx).
 
 -- Agency users: anyone signing in with these phones becomes agency staff.
--- 919999900099 has the local test OTP 123456 (see supabase/config.toml).
+-- 919999900099 (agency admin) and 919999900098 (developer) have the local test
+-- OTP 123456 (see supabase/config.toml).
 insert into public.admin_phones (phone, role, full_name) values
-  ('919999900099', 'admin', 'ManeMaid Admin');
+  ('919999900099', 'admin', 'ManeMaid Admin'),
+  ('919999900098', 'developer', 'ManeMaid Developer');
 
 insert into public.service_categories (code, name, description, sort_order) values
   ('home_care',    'Home care',    'Daily cleaning, dusting, mopping and laundry', 1),
@@ -66,3 +68,14 @@ insert into public.scope_templates (title, body, category_code, sort_order) valu
   ('Live-in help',
    'Full-time live-in help: daily cleaning, cooking assistance, laundry and household support. Weekly off as agreed.',
    'live_in', 6);
+
+-- Sample offers (managed by the agency in the web portal).
+insert into public.offers (title, body, terms, category_code, audience, starts_at, ends_at, sort_order) values
+  ('Welcome offer: 20% off your first month',
+   'New to ManeMaid? Book any home-care service and get 20% off the first month of service.',
+   'For new customers only. Applied in your quotation. One offer per customer.',
+   null, 'new_customers', now() - interval '1 day', now() + interval '30 days', 1),
+  ('Festive deep cleaning',
+   'Get your home festival-ready: a full deep clean with a free kitchen degreasing add-on.',
+   'Valid for housekeeping bookings starting before the offer ends.',
+   'housekeeping', 'all', now() - interval '1 day', now() + interval '14 days', 2);

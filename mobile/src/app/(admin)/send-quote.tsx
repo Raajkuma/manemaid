@@ -38,7 +38,7 @@ export default function SendQuote() {
   const q = useLiveQuery(
     async () => {
       const [booking, templates] = await Promise.all([
-        supabase.from('bookings').select('reference, category_code, service_categories(name)').eq('id', id).single(),
+        supabase.from('bookings').select('reference, category_code, offer_title, service_categories(name)').eq('id', id).single(),
         supabase.from('scope_templates').select('*').eq('active', true).order('sort_order'),
       ]);
       return { booking: unwrap(booking), templates: unwrap(templates) };
@@ -116,7 +116,7 @@ export default function SendQuote() {
   if (q.loading) return <Screen edges={[]}><Loading /></Screen>;
   if (q.error || !q.data) return <Screen edges={[]}><ErrorState message={q.error ?? 'Not found'} onRetry={q.reload} /></Screen>;
 
-  const b = q.data.booking as unknown as { reference: string; category_code: string; service_categories: { name: string } | null };
+  const b = q.data.booking as unknown as { reference: string; category_code: string; offer_title: string | null; service_categories: { name: string } | null };
 
   return (
     <Screen edges={[]} footer={<Button label="Review & send" icon="paper-plane" onPress={send} />}>
@@ -127,6 +127,18 @@ export default function SendQuote() {
           <Muted>Quotation for {b.reference}</Muted>
         </View>
       </Row>
+
+      {b.offer_title ? (
+        <Card tone="orange" index={0}>
+          <Row style={{ gap: space.md }}>
+            <Icon3D name="pricetag" tone="orange" size={40} />
+            <View style={{ flex: 1 }}>
+              <Strong style={{ fontSize: 15 }}>Customer claimed: {b.offer_title}</Strong>
+              <Muted>Reflect the offer in the price or the terms below.</Muted>
+            </View>
+          </Row>
+        </Card>
+      ) : null}
 
       <Card index={0}>
         <Select

@@ -89,7 +89,7 @@ export const PRIVACY: LegalSection[] = [
     title: 'What we collect',
     icon: 'folder-open',
     body: [
-      'Account: your mobile number, name and an optional profile photo.',
+      'Account: your mobile number, name, an optional profile photo and an optional email address.',
       'Service: your addresses and access instructions, booking details (service, schedule, household size, language preference, special instructions), quotations, your approvals and the reasons you give.',
       'Payments: the amount, method and transaction reference you submit. We never collect card numbers, UPI PINs or bank passwords.',
       'Support: the requests and messages you send us.',
@@ -101,6 +101,7 @@ export const PRIVACY: LegalSection[] = [
     body: [
       'To check that we serve your area, prepare quotations, match and propose staff, schedule visits, verify payments, give you support and send booking updates.',
       'To keep an audit trail of booking changes, payments and support requests, so disputes can be resolved fairly.',
+      'Offers by email: only if you switch on “Send me offers by email” in your profile. We record when you agreed, and you can switch it off at any time. (Draft wording — for legal review.)',
       'We do not sell your data and do not use it for third-party advertising.',
     ],
   },

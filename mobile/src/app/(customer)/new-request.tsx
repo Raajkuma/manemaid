@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState, type ReactNode } from 'react';
 import { ScrollView, Switch, Text, View } from 'react-native';
@@ -64,7 +65,9 @@ function Step({ n, icon, title, children, tone = 'primary' }: { n: number; icon:
 
 export default function NewRequest() {
   const popup = usePopup();
-  const params = useLocalSearchParams<{ category?: string }>();
+  const params = useLocalSearchParams<{ category?: string; offer?: string }>();
+  // Offer claimed from an offer card (removable). Validated again by the server on submit.
+  const [offerId, setOfferId] = useState<string | null>(params.offer ?? null);
   const [category, setCategory] = useState(params.category ?? 'home_care');
   const [engagement, setEngagement] = useState<EngagementType>('part_time');
   const [startDate, setStartDate] = useState(() => {
@@ -86,15 +89,17 @@ export default function NewRequest() {
 
   const q = useLiveQuery(
     async () => {
-      const [cats, addresses, zones] = await Promise.all([
+      const [cats, addresses, zones, offers] = await Promise.all([
         supabase.from('service_categories').select('*').eq('active', true).order('sort_order'),
         supabase.from('customer_addresses').select('*').order('is_default', { ascending: false }),
         supabase.from('service_zones').select('pincode').eq('active', true),
+        params.offer ? supabase.rpc('get_my_offers') : Promise.resolve({ data: [], error: null }),
       ]);
       return {
         categories: unwrap(cats),
         addresses: unwrap(addresses),
         zones: new Set(unwrap(zones).map((z) => z.pincode)),
+        offers: (offers.error ? [] : (offers.data ?? [])) as { id: string; title: string; category_code: string | null }[],
       };
     },
     { key: 'new-request' },
@@ -109,6 +114,10 @@ export default function NewRequest() {
       }),
     [],
   );
+
+  const offer = offerId ? (q.data?.offers.find((o) => o.id === offerId) ?? null) : null;
+  const offerFits = !!offer && (!offer.category_code || offer.category_code === category);
+  const offerServiceName = offer?.category_code ? q.data?.categories.find((c) => c.code === offer.category_code)?.name : null;
 
   const addresses = q.data?.addresses ?? [];
   const selectedAddress = addresses.find((a) => a.id === addressId) ?? addresses.find((a) => q.data?.zones.has(a.pincode));
@@ -156,6 +165,7 @@ export default function NewRequest() {
               p_language_prefs: languages,
               p_special_instructions: instructions.trim() || undefined,
               p_trial_requested: trial,
+              p_offer_id: offerFits ? offer!.id : undefined,
             }),
           );
           bookingId = booking.id;
@@ -201,6 +211,28 @@ export default function NewRequest() {
           );
         })}
       </ScrollView>
+
+      {offer ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: space.sm,
+            backgroundColor: offerFits ? colors.orangeSoft : colors.dangerSoft,
+            borderRadius: radius.md,
+            padding: space.md,
+            marginBottom: space.md,
+          }}
+        >
+          <Ionicons name="pricetag" size={18} color={offerFits ? colors.orange : colors.danger} />
+          <Text style={{ flex: 1, fontFamily: fonts.medium, fontSize: 14, color: offerFits ? colors.orange : colors.danger }}>
+            {offerFits ? `Offer applied: ${offer.title}` : `“${offer.title}” is only for ${offerServiceName ?? 'another service'}. Switch back to use it.`}
+          </Text>
+          <Pressable3D onPress={() => setOfferId(null)} accessibilityLabel="Remove offer" tilt={0} style={{ padding: 4 }}>
+            <Ionicons name="close" size={18} color={offerFits ? colors.orange : colors.danger} />
+          </Pressable3D>
+        </View>
+      ) : null}
 
       <Step n={1} icon="briefcase" title="Engagement">
         <ChipGroup>

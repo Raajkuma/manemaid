@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { errorMessage } from './format';
 import { supabase } from './supabase';
 
-type LiveTable = 'bookings' | 'notifications' | 'support_tickets' | 'ticket_messages';
+type LiveTable = 'bookings' | 'notifications' | 'support_tickets' | 'ticket_messages' | 'offers' | 'greetings' | 'greeting_deliveries' | 'staff' | 'scope_templates';
 
 /**
  * Load data when the screen gains focus, and reload whenever one of the

@@ -64,7 +64,18 @@ export function runRpc(ctx: Ctx, name: string, a: Record<string, any>): any {
   const db = ctx.db;
   const me = ctx.uid()!;
   const agency = ctx.isAgency();
-  const agencyIds = () => db.profiles.filter((p) => p.role === 'admin' || p.role === 'coordinator').map((p) => p.id);
+  const agencyIds = () => db.profiles.filter((p) => ['admin', 'coordinator', 'developer'].includes(p.role)).map((p) => p.id);
+  // Same rules as public._offer_eligible.
+  const offerEligible = (o: Row, customer: string | null, category?: string | null) => {
+    const now = Date.now();
+    return (
+      o.active &&
+      new Date(o.starts_at).getTime() <= now &&
+      (!o.ends_at || new Date(o.ends_at).getTime() > now) &&
+      (!category || !o.category_code || o.category_code === category) &&
+      (o.audience === 'all' || !db.bookings.some((b) => b.customer_id === customer))
+    );
+  };
   const requireAgency = () => {
     if (!agency) fail('Agency access required', '42501');
   };
@@ -105,6 +116,39 @@ export function runRpc(ctx: Ctx, name: string, a: Record<string, any>): any {
 
   switch (name) {
     // ---------------------------------------------------------------- shared
+    case 'get_my_offers':
+      if (!me) fail('permission denied', '42501');
+      return db.offers
+        .filter((o) => offerEligible(o, me))
+        .sort((x, y) => x.sort_order - y.sort_order || y.starts_at.localeCompare(x.starts_at));
+
+    case 'get_my_greetings':
+    case 'mark_greeting_seen': {
+      if (!me) fail('permission denied', '42501');
+      const today = new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 10);
+      const isCustomer = db.profiles.find((p) => p.id === me)?.role === 'customer';
+      const activeCustomer = db.bookings.some((b) => b.customer_id === me && ['confirmed', 'active'].includes(b.status));
+      const forMe = (g: Row) =>
+        isCustomer && g.active && g.starts_on <= today && g.ends_on >= today && (g.audience === 'all' || activeCustomer);
+      const seen = (g: Row) => db.greeting_deliveries.some((d) => d.greeting_id === g.id && d.user_id === me);
+      if (name === 'get_my_greetings') {
+        return db.greetings.filter((g) => forMe(g) && !seen(g)).sort((x, y) => y.starts_on.localeCompare(x.starts_on));
+      }
+      const g = db.greetings.find((x) => x.id === a.p_greeting_id);
+      if (!g || !forMe(g) || seen(g)) return null;
+      db.greeting_deliveries.push({ greeting_id: g.id, user_id: me, seen_at: nowISO() });
+      if (g.push_to_inbox) ctx.notify([me], { title: `🎉 ${g.title}`, body: g.message, booking_id: null });
+      ctx.commit('greeting_deliveries', 'notifications');
+      return null;
+    }
+
+    case 'get_public_config':
+      return db.app_config.filter((c) => c.is_public).map((c) => ({ key: c.key, value: c.value }));
+
+    case 'report_error':
+      // The offline demo keeps no error log.
+      return null;
+
     case 'check_serviceable':
       return db.service_zones.some((z) => z.pincode === a.p_pincode && z.active);
 
@@ -196,6 +240,11 @@ export function runRpc(ctx: Ctx, name: string, a: Record<string, any>): any {
       if (!db.service_zones.some((z) => z.pincode === addr.pincode && z.active)) fail(`Sorry, we do not serve PIN code ${addr.pincode} yet`);
       if (!db.service_categories.some((c) => c.code === a.p_category_code && c.active)) fail('Unknown service');
       if (a.p_start_date < localDate()) fail('Start date cannot be in the past');
+      let offer: Row | null = null;
+      if (a.p_offer_id) {
+        offer = db.offers.find((o) => o.id === a.p_offer_id) ?? null;
+        if (!offer || !offerEligible(offer, me, a.p_category_code)) fail('This offer is no longer available');
+      }
       const t = (v: any) => (v ? (String(v).length === 5 ? `${v}:00` : String(v)) : null);
       const b: Row = {
         id: uid(),
@@ -223,6 +272,8 @@ export function runRpc(ctx: Ctx, name: string, a: Record<string, any>): any {
         payment_reference: null,
         paid_amount: null,
         paid_at: null,
+        offer_id: offer?.id ?? null,
+        offer_title: offer?.title ?? null,
         created_at: nowISO(),
         updated_at: nowISO(),
       };
@@ -230,7 +281,11 @@ export function runRpc(ctx: Ctx, name: string, a: Record<string, any>): any {
       db.bookings.push(b);
       event(b, null, 'enquiry_submitted', null);
       ctx.notify([me], { title: `${b.reference}: Enquiry received`, body: 'Thanks! The agency will review your request and send a quotation.', booking_id: b.id });
-      ctx.notify(agencyIds(), { title: `New enquiry ${b.reference}`, body: 'A customer submitted a new service request.', booking_id: b.id });
+      ctx.notify(agencyIds(), {
+        title: `New enquiry ${b.reference}`,
+        body: offer ? `A customer submitted a new service request and claimed offer: ${offer.title}` : 'A customer submitted a new service request.',
+        booking_id: b.id,
+      });
       commitAll();
       return b;
     }

@@ -53,6 +53,7 @@ async function main() {
   const A = await login('+919999900001');
   const ADM = await login('+919999900099');
   const B = await login('+919999900002');
+  const DEV = await login('+919999900098');
 
   // ---------- customer profile & addresses
   const meA = ok('customer profile', await A.from('profiles').select('*').single());
@@ -176,10 +177,63 @@ async function main() {
   const bTickets = ok('B tickets', await B.from('support_tickets').select('customer_id'));
   check('B sees only own tickets', bTickets.length >= 1 && bTickets.every((t) => t.customer_id === bId));
 
+  // ---------- offers (agency manages, customer claims)
+  const offer = ok('agency creates offer', await ADM.from('offers').insert({ title: `Live test offer ${RUN}`, body: 'Ten percent off cooking', category_code: 'cooking', audience: 'all' }).select().single());
+  check('customer cannot read offers table directly', ok('offers (customer)', await A.from('offers').select('id')).length === 0);
+  check('customer sees the live offer', ok('my offers', await A.rpc('get_my_offers')).some((o) => o.id === offer.id));
+  check('claiming for another service is rejected', !!(await A.rpc('submit_enquiry', { p_address_id: addr.id, p_category_code: 'home_care', p_engagement_type: 'part_time', p_start_date: start, p_days_of_week: [4], p_time_start: '10:00', p_time_end: '11:00', p_offer_id: offer.id })).error);
+  const claimed = ok('book with the offer', await A.rpc('submit_enquiry', { p_address_id: addr.id, p_category_code: 'cooking', p_engagement_type: 'part_time', p_start_date: start, p_days_of_week: [4], p_time_start: '10:00', p_time_end: '11:00', p_offer_id: offer.id }));
+  const claimedId = claimed?.id ?? claimed;
+  const agencyView = ok('agency sees claim', await ADM.from('bookings').select('offer_id, offer_title').eq('id', claimedId).single());
+  check('booking carries the offer for the agency', agencyView.offer_id === offer.id && agencyView.offer_title === offer.title);
+  ok('agency hides offer', await ADM.from('offers').update({ active: false }).eq('id', offer.id));
+  check('hidden offer disappears for customers', !ok('my offers after hide', await A.rpc('get_my_offers')).some((o) => o.id === offer.id));
+  ok('cancel the offer booking', await A.rpc('update_booking_status', { p_booking_id: claimedId, p_to: 'cancelled_by_customer', p_reason: 'Test cleanup' }));
+  ok('agency deletes offer', await ADM.from('offers').delete().eq('id', offer.id));
+
+  // ---------- greetings (agency posts, customer sees once, Inbox copy)
+  const india = new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 10);
+  const greet = ok('agency posts greeting', await ADM.from('greetings').insert({ title: `Live test wishes ${RUN}`, message: 'Happy festival!', starts_on: india, ends_on: india }).select().single());
+  check('customer cannot read greetings table', ok('greetings (customer)', await B.from('greetings').select('id')).length === 0);
+  check('customer sees the greeting', ok('my greetings', await B.rpc('get_my_greetings')).some((g) => g.id === greet.id));
+  ok('mark greeting seen', await B.rpc('mark_greeting_seen', { p_greeting_id: greet.id }));
+  ok('mark greeting seen again', await B.rpc('mark_greeting_seen', { p_greeting_id: greet.id }));
+  check('greeting shown only once', !ok('my greetings after', await B.rpc('get_my_greetings')).some((g) => g.id === greet.id));
+  check('one Inbox copy only', ok('inbox greeting', await B.from('notifications').select('id').eq('title', `🎉 Live test wishes ${RUN}`)).length === 1);
+  check('agency sees who saw it', ok('deliveries', await ADM.from('greeting_deliveries').select('user_id').eq('greeting_id', greet.id)).length === 1);
+  check('agency is never shown customer greetings', ok('agency greetings', await ADM.rpc('get_my_greetings')).length === 0);
+  ok('agency deletes greeting', await ADM.from('greetings').delete().eq('id', greet.id));
+
+  // ---------- live configuration (developer only)
+  const tagline = `Live test tagline ${RUN}`;
+  await ADM.from('app_config').update({ value: 'hacked' }).eq('key', 'content.home_tagline');
+  check('agency cannot change config', ok('config (agency)', await ADM.from('app_config').select('value').eq('key', 'content.home_tagline').single()).value !== 'hacked');
+  const before = ok('config before', await DEV.from('app_config').select('value').eq('key', 'content.home_tagline').single()).value;
+  ok('developer changes tagline', await DEV.from('app_config').update({ value: tagline }).eq('key', 'content.home_tagline'));
+  check('customer sees new tagline', ok('config (customer)', await A.from('app_config').select('value').eq('key', 'content.home_tagline').single()).value === tagline);
+  ok('developer restores tagline', await DEV.from('app_config').update({ value: before }).eq('key', 'content.home_tagline'));
+
+  // ---------- email + consent
+  const meAfter = ok('set email + opt in', await A.from('profiles').update({ email: `a.${RUN}@example.com`, marketing_opt_in: true }).eq('id', meA.id).select().single());
+  check('opt-in time recorded', !!meAfter.marketing_opt_in_at);
+  ok('opt out', await A.from('profiles').update({ marketing_opt_in: false }).eq('id', meA.id));
+
+  // ---------- developer console data
+  check('developer reads activity log', ok('audit (dev)', await DEV.from('audit_log').select('id').limit(5)).length > 0);
+  check('agency cannot read activity log', ok('audit (agency)', await ADM.from('audit_log').select('id').limit(5)).length === 0);
+  check('developer reads sign-ins', ok('sign-ins (dev)', await DEV.rpc('get_signin_log', { p_limit: 5 })).length > 0);
+  check('agency cannot read sign-ins', !!(await ADM.rpc('get_signin_log', { p_limit: 5 })).error);
+  ok('report an error', await A.rpc('report_error', { p_source: 'mobile', p_message: `Live test error ${RUN}` }));
+  check('developer sees reported error', ok('errors (dev)', await DEV.from('app_errors').select('message').eq('message', `Live test error ${RUN}`)).length === 1);
+  check('developer manages staff access', ok('staff list', await DEV.rpc('list_staff_access')).some((r) => r.role === 'developer'));
+  check('agency cannot manage staff access', !!(await ADM.rpc('list_staff_access')).error);
+
   // storage buckets (photo upload)
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
   ok('upload avatar', await A.storage.from('avatars').upload(`${meA.id}/e2e-${Date.now()}.png`, png, { contentType: 'image/png' }));
   ok('upload staff photo', await ADM.storage.from('staff-photos').upload(`${newStaff.id}/e2e-${Date.now()}.png`, png, { contentType: 'image/png' }));
+  ok('agency uploads offer image', await ADM.storage.from('offer-images').upload(`banners/e2e-${Date.now()}.png`, png, { contentType: 'image/png' }));
+  check('customer cannot upload offer image', !!(await A.storage.from('offer-images').upload(`banners/x-${Date.now()}.png`, png, { contentType: 'image/png' })).error);
   check('customer cannot upload staff photo', !!(await A.storage.from('staff-photos').upload(`x/e2e-${Date.now()}.png`, png, { contentType: 'image/png' })).error);
 }
 
