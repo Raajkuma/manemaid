@@ -28,6 +28,7 @@ import Animated, {
   FadeInDown,
   SlideInDown,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withSequence,
@@ -121,6 +122,83 @@ export function Pressable3D({
   );
 }
 
+/**
+ * Endless gentle bob (0 → 1 → 0). The app plays entrance animations even with the
+ * system "Reduce Motion" setting on (see ReducedMotionConfig in app/_layout.tsx), but
+ * never-ending loops like this one stay still for people who asked for less motion.
+ * useReducedMotion() reads the device setting, not that override.
+ */
+function useFloat(enabled: boolean) {
+  const reduceMotion = useReducedMotion();
+  const f = useSharedValue(0);
+  useEffect(() => {
+    if (!enabled || reduceMotion) return;
+    f.set(
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 3400, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0, { duration: 3400, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+      ),
+    );
+  }, [enabled, reduceMotion, f]);
+  return f;
+}
+
+/**
+ * Round "glass" button for the gradient hero header: white icon on a translucent
+ * circle, with an optional red count bubble (e.g. unread notifications).
+ */
+export function HeroAction({
+  icon,
+  onPress,
+  count,
+  accessibilityLabel,
+  size = 48,
+  float = false,
+}: {
+  icon: IconName;
+  onPress?: () => void;
+  count?: number;
+  accessibilityLabel: string;
+  size?: number;
+  float?: boolean;
+}) {
+  const f = useFloat(float);
+  const a = useAnimatedStyle(() => ({ transform: [{ translateY: -2.5 * f.get() }] }));
+  const label = count ? `${accessibilityLabel}, ${count} unread` : accessibilityLabel;
+  const body = (
+    <Animated.View style={[{ width: size, height: size }, a]}>
+      <View
+        style={[
+          styles.heroAction,
+          { width: size, height: size, borderRadius: size / 2 },
+        ]}
+      >
+        <Ionicons name={icon} size={Math.round(size * 0.5)} color="#fff" />
+      </View>
+      {count && count > 0 ? (
+        <View style={styles.heroActionBadge} pointerEvents="none">
+          <Text style={styles.heroActionBadgeText}>{count > 99 ? '99+' : count}</Text>
+        </View>
+      ) : null}
+    </Animated.View>
+  );
+  if (!onPress) {
+    return (
+      <View accessible accessibilityLabel={label}>
+        {body}
+      </View>
+    );
+  }
+  return (
+    <Pressable3D onPress={onPress} accessibilityLabel={label} tilt={14}>
+      {body}
+    </Pressable3D>
+  );
+}
+
 /** Gradient-lit, tilted icon tile. Appears instantly (no pop-in); can gently float. */
 export function Icon3D({
   name,
@@ -137,19 +215,7 @@ export function Icon3D({
   delay?: number;
   gradient?: readonly [string, string, ...string[]];
 }) {
-  const f = useSharedValue(0);
-  useEffect(() => {
-    if (!float) return;
-    f.set(
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: 3400, easing: Easing.inOut(Easing.sin) }),
-          withTiming(0, { duration: 3400, easing: Easing.inOut(Easing.sin) }),
-        ),
-        -1,
-      ),
-    );
-  }, [float, f]);
+  const f = useFloat(float);
   const a = useAnimatedStyle(() => ({
     transform: [
       { perspective: 600 },
@@ -270,10 +336,12 @@ export function Hero({
   underHeader?: boolean;
 }) {
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
   const f = useSharedValue(0);
   useEffect(() => {
+    if (reduceMotion) return;
     f.set(withRepeat(withTiming(1, { duration: 8000, easing: Easing.inOut(Easing.sin) }), -1, true));
-  }, [f]);
+  }, [f, reduceMotion]);
   const orb = useAnimatedStyle(() => ({ transform: [{ translateY: 10 * f.get() }, { translateX: -8 * f.get() }] }));
   return (
     <LinearGradient
@@ -807,6 +875,28 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   orb: { position: 'absolute', borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.12)' },
+  heroAction: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  heroActionBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 5,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.danger,
+    borderWidth: 2,
+    borderColor: gradients.hero[0],
+  },
+  heroActionBadgeText: { fontFamily: fonts.bold, fontSize: 11, color: '#fff', lineHeight: 13 },
   heroEyebrow: { fontFamily: fonts.bold, fontSize: 12, letterSpacing: 1.4, color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', marginBottom: 6 },
   heroTitle: { fontFamily: fonts.display, fontSize: 28, color: '#fff', letterSpacing: -0.5 },
   heroSubtitle: { fontFamily: fonts.body, fontSize: 15, color: 'rgba(255,255,255,0.85)', marginTop: 4, lineHeight: 21 },

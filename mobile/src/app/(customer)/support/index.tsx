@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 
 import { SupportCard, type AgencySupport } from '@/components/booking';
 import { PRIORITY, TicketListItem, type Ticket } from '@/components/support';
-import { Badge, Button, Card, EmptyState, ErrorState, Hero, Icon3D, Loading, Muted, Row, Screen, SectionTitle, Strong } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, ErrorState, Hero, HeroAction, Icon3D, Loading, Muted, Row, Screen, SectionTitle, Strong } from '@/components/ui';
 import { useLiveQuery } from '@/lib/hooks';
 import { supabase, unwrap } from '@/lib/supabase';
 import { colors, fonts, space } from '@/lib/theme';
@@ -36,7 +36,7 @@ export default function SupportCentre() {
           eyebrow="Help & support"
           title={priority ? 'Priority support' : 'Support centre'}
           subtitle={priority ? 'You are a priority customer — we respond within 4 hours.' : 'We are here to help, every day.'}
-          right={<Icon3D name={priority ? 'star' : 'headset'} size={56} gradient={priority ? ['#FFE7A3', '#F5B83D'] : ['#FFFFFF', '#E4DEFF']} float />}
+          right={priority ? <Icon3D name="star" size={56} gradient={['#FFE7A3', '#F5B83D']} float /> : <HeroAction icon="headset" size={56} accessibilityLabel="Support" float />}
         />
       }
     >

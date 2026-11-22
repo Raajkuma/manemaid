@@ -25,7 +25,7 @@ import { supabase, unwrap } from '@/lib/supabase';
 import { colors, fonts, gradients, radius, space } from '@/lib/theme';
 
 import { usePopup } from './popup';
-import { Avatar, Badge, Body, Button, Card, Divider, Heading, Icon3D, KeyValue, Muted, Row, Strong } from './ui';
+import { Avatar, Badge, Body, Button, Card, Divider, Heading, HeroAction, Icon3D, KeyValue, Muted, Row, Strong } from './ui';
 
 export type BookingWithRefs = Tables<'bookings'> & {
   customer_addresses: Tables<'customer_addresses'> | null;
@@ -130,7 +130,7 @@ export function BookingSummary({ booking, audience }: { booking: BookingWithRefs
     <Card style={{ padding: 0, overflow: 'hidden' }}>
       <LinearGradient colors={gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: space.lg }}>
         <Row style={{ gap: space.md }}>
-          <Icon3D name={CATEGORY_ICON[booking.category_code] ?? 'briefcase'} size={54} gradient={['#FFFFFF', '#E7E3FF']} />
+          <HeroAction icon={CATEGORY_ICON[booking.category_code] ?? 'briefcase'} size={54} accessibilityLabel={booking.service_categories?.name ?? booking.category_code} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: 'rgba(255,255,255,0.8)', fontFamily: fonts.medium, fontSize: 13 }}>{booking.reference}</Text>
             <Text style={{ color: '#fff', fontFamily: fonts.display, fontSize: 22 }}>
@@ -464,7 +464,7 @@ export function SupportCard({ support, showCentreLink = true }: { support: Agenc
     <Card style={{ padding: 0, overflow: 'hidden' }}>
       <LinearGradient colors={gradients.green} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: space.lg }}>
         <Row style={{ gap: space.md }}>
-          <Icon3D name="headset" size={52} gradient={['#FFFFFF', '#DDF7EA']} float />
+          <HeroAction icon="headset" size={52} accessibilityLabel="Agency support" float />
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#fff', fontFamily: fonts.heading, fontSize: 18 }}>{support.agency_name} support</Text>
             <Text style={{ color: 'rgba(255,255,255,0.9)', fontFamily: fonts.body, fontSize: 13 }}>

@@ -5,7 +5,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-na
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, Field, Heading, Icon3D, Muted, Row } from '@/components/ui';
+import { Button, Card, Field, Heading, HeroAction, Icon3D, Muted, Row } from '@/components/ui';
 import { errorFeedback, successFeedback } from '@/lib/feedback';
 import { errorMessage } from '@/lib/format';
 import { useSession } from '@/lib/session';
@@ -76,7 +76,7 @@ export default function SignIn() {
         >
           <View style={{ position: 'absolute', top: -80, right: -60, width: 240, height: 240, borderRadius: 120, backgroundColor: 'rgba(255,255,255,0.10)' }} />
           <View style={{ position: 'absolute', bottom: -40, left: -50, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.08)' }} />
-          <Icon3D name="home" size={92} gradient={['#FFFFFF', '#E4DEFF']} float />
+          <HeroAction icon="home" size={92} accessibilityLabel="ManeMaid" float />
           <Animated.Text entering={FadeInDown.delay(150).springify()} style={{ fontFamily: fonts.display, fontSize: 36, color: '#fff', marginTop: space.lg, letterSpacing: -0.8 }}>
             ManeMaid
           </Animated.Text>

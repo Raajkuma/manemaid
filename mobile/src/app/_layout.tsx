@@ -10,6 +10,7 @@ import { Stack } from 'expo-router/stack';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 
 import { GateScreen } from '@/components/app-gate';
 import { PopupProvider } from '@/components/popup';
@@ -101,6 +102,10 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <PopupProvider>
+        {/* Reanimated skips every animation when iOS "Reduce Motion" is on, which made the
+            app look broken. Play the short entrance/press animations anyway; endless loops
+            (floating icons, hero orbs) still respect the setting via useReducedMotion(). */}
+        <ReducedMotionConfig mode={ReduceMotion.Never} />
         <StatusBar style="dark" />
         {/* If fonts fail to load we still start, with system fonts. */}
         <RootNavigator fontsReady={fontsLoaded || !!fontError} />
